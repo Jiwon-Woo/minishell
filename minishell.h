@@ -8,6 +8,8 @@
 # include <limits.h>
 # include <fcntl.h>
 # include <sys/stat.h>
+# include <readline/readline.h>
+# include <readline/history.h>
 
 int		ft_strlen(char *str);
 char	*empty_line(void);
@@ -27,5 +29,6 @@ int		atoi_sign(char *str);
 int		ft_atoi(char *str, int *integer);
 
 int 		get_arg_num(char *line);
+char	*ft_strjoin(char *s1, char *s2);
 
 #endif
