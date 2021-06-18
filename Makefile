@@ -1,6 +1,7 @@
-USER = jwoo
+USER = jiwonwoo
 NAME = minishell
 LIB = libminishell.a
+LIBA = ./libft/libft.a
 CFLAGS = -Wall -Wextra -Werror
 LIBREADLINE = -L/usr/include -lreadline -L/Users/$(USER)/.brew/opt/readline/lib -I /Users/$(USER)/.brew/opt/readline/include
 LIBMINISHELL = -L. -lminishell
@@ -11,14 +12,16 @@ SOURCE = ft_split_space.c \
 OBJECT = $(SOURCE:.c=.o)
 MAIN = main.c
 
+TEMP = -L/usr/local/opt/ruby/lib -I/usr/local/opt/ruby/include
+
 all : $(NAME)
 
-# libft : ./libft/libft.a
-# 	make -C ./libft all
+libft :
+	@make -C ./libft all
 
-$(NAME): $(LIB) $(MAIN)
-	make -C ./libft all
-	gcc $(MAIN) $(CFLAGS) $(LIBMINISHELL) $(LIBFT) $(LIBREADLINE) -o $(NAME)
+$(NAME): $(LIB) $(MAIN) libft
+#	gcc $(MAIN) $(CFLAGS) $(LIBMINISHELL) $(LIBFT) $(LIBREADLINE) $(TEMP) -o $(NAME)
+	@gcc $(MAIN) $(CFLAGS) $(LIBMINISHELL) $(LIBFT) -L/usr/include -lreadline $(TEMP) -o $(NAME)
 $(LIB): $(OBJECT)
 	@ar rcs $(LIB) $(OBJECT)
 $(OBJECT): $(SOURCE)
@@ -33,4 +36,4 @@ fclean: clean
 	@rm -f $(NAME)
 re:	fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re libft

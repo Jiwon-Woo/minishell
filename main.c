@@ -1,25 +1,5 @@
 #include "minishell.h"
 
-int	is_numeric(char **split, int arg_num)
-{
-	int	i = 0;
-	int	j;
-
-	if (split[1] == 0)
-		return (0);
-	j = -1;
-	while (++j < ft_strlen(split[1]))
-	{
-		if (j == 0 && (split[1][j] == '-' || split[1][j] == '+'))
-			continue;
-		if (!(split[i][j] >= '0' && split[i][j] <= '9'))
-			return (-1);
-	}
-	if (arg_num == 1)
-		return (1);
-	return (-42);
-}
-
 int	main()
 {
 	// int		ret;
