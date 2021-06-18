@@ -1,7 +1,7 @@
 
 #include "minishell.h"
 
-// int		is_space(char s)
+// int		ft_isspace(char s)
 // {
 // 	if (s == 32 || (9 <= s && s <= 13))
 // 		return (1);
@@ -16,7 +16,7 @@ int 		get_arg_num(char *line)
 {
 	int 	arg_num;
 
-	while (is_space(*line))
+	while (ft_isspace(*line))
 		line++;
 	arg_num = 1;
 	while(*line)
@@ -32,16 +32,16 @@ int 		get_arg_num(char *line)
 					line++;
 			if (*line++ == 0)
 				return (-1);
-			else if (is_space(*line))
+			else if (ft_isspace(*line))
 			{
-				while (is_space(*line))
+				while (ft_isspace(*line))
 					line++;
 				arg_num++;
 			}
 		}
-		else if (is_space(*line))
+		else if (ft_isspace(*line))
 		{
-			while (is_space(*line))
+			while (ft_isspace(*line))
 				line++;
 			if (*line)
 				arg_num++;

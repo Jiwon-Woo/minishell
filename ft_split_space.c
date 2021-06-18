@@ -1,12 +1,5 @@
 #include "minishell.h"
 
-int		is_space(char s)
-{
-	if (s == 32 || (9 <= s && s <= 13))
-		return (1);
-	return (0);
-}
-
 char	**free_two_dimension(char **word, int num)
 {
 	int	n;
@@ -22,7 +15,6 @@ char	**free_two_dimension(char **word, int num)
 	return (NULL);
 }
 
-
 int		factor_num(char *s)
 {
 	int	num;
@@ -31,12 +23,12 @@ int		factor_num(char *s)
 	if (*s == 0)
 		return (0);
 	num = 0;
-	if (is_space(s[0]) == 0)
+	if (ft_isspace(s[0]) == 0)
 		num++;
 	index = 0;
 	while (++index < ft_strlen(s))
 	{
-		if (is_space(s[index - 1]) == 1 && is_space(s[index]) == 0)
+		if (ft_isspace(s[index - 1]) == 1 && ft_isspace(s[index]) == 0)
 			num++;
 	}
 	return (num);
@@ -52,10 +44,10 @@ char	**factor_len(char **factor, char *s, int factor_num)
 	num = 0;
 	while (num < factor_num && index < ft_strlen(s))
 	{
-		while (is_space(s[index]) == 1 && index < ft_strlen(s))
+		while (ft_isspace(s[index]) == 1 && index < ft_strlen(s))
 			index++;
 		len = 0;
-		while (is_space(s[index]) == 0 && index < ft_strlen(s))
+		while (ft_isspace(s[index]) == 0 && index < ft_strlen(s))
 		{
 			len++;
 			index++;
@@ -82,13 +74,13 @@ void	factor_split(char **factor, char *s, int factor_num)
 	len = 0;
 	while (num < factor_num && index < ft_strlen(s))
 	{
-		if (is_space(s[index]) == 1)
+		if (ft_isspace(s[index]) == 1)
 		{
 			index++;
 			continue ;
 		}
 		len = 0;
-		while (is_space(s[index]) == 0 && index < ft_strlen(s))
+		while (ft_isspace(s[index]) == 0 && index < ft_strlen(s))
 		{
 			factor[num][len] = s[index];
 			len++;

@@ -1,7 +1,6 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-# include "./libft/libft.h"
 # include <stdio.h>
 # include <math.h>
 # include <limits.h>
@@ -9,14 +8,10 @@
 # include <sys/stat.h>
 # include <readline/readline.h>
 # include <readline/history.h>
+# include <stdlib.h>
+# include <unistd.h>
+# include "libft/libft.h"
 
-int		ft_strlen(char *str);
-char	*empty_line(void);
-void	str_char_append(char **str, char c);
-int		ret_gnl(char **line, char *gnl, int rs);
-int		get_next_line(int fd, char **line);
-
-int		is_space(char s);
 int		factor_num(char *s);
 char	**factor_len(char **factor, char *s, int factor_num);
 void	factor_split(char **factor, char *s, int factor_num);
@@ -27,7 +22,5 @@ int 	get_arg_num(char *line);
 int		atoi_sign(char *str);
 int		ft_atoi(char *str, int *integer);
 
-int 		get_arg_num(char *line);
-char	*ft_strjoin(char *s1, char *s2);
 
 #endif

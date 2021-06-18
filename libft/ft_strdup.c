@@ -1,30 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strncmp.c                                       :+:      :+:    :+:   */
+/*   ft_strdup.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/12/24 01:50:40 by jwoo              #+#    #+#             */
-/*   Updated: 2021/06/18 14:55:55 by jwoo             ###   ########.fr       */
+/*   Created: 2020/12/31 00:35:03 by jwoo              #+#    #+#             */
+/*   Updated: 2021/06/18 19:35:52 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int	ft_strncmp(char *s1, char *s2, int n)
+char	*ft_strdup(char *s1)
 {
-	int	len;
-	
-	if (n == 0)
-		return (0);
-	len = 0;
-	while (len + 1 < n && s1[len] && s2[len])
+	char	*str;
+	int	count;
+
+	str = NULL;
+	count = ft_strlen(s1);
+	str = malloc(sizeof(char) * (count + 1));
+	if (str == NULL)
+		return (NULL);
+	count = 0;
+	while (s1[count])
 	{
-		if (s1[len] == s2[len])
-			len++;
-		else
-			break ;
+		str[count] = s1[count];
+		count++;
 	}
-	return (s1[len] - s2[len]);
+	str[count] = 0;
+	return (str);
 }

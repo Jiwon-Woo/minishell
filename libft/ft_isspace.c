@@ -1,33 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strdup.c                                        :+:      :+:    :+:   */
+/*   ft_isspace.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/12/31 00:35:03 by jwoo              #+#    #+#             */
-/*   Updated: 2021/06/18 14:51:25 by jwoo             ###   ########.fr       */
+/*   Created: 2021/06/18 19:38:28 by jwoo              #+#    #+#             */
+/*   Updated: 2021/06/18 19:38:33 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
-
-char	*ft_strdup(const char *s1)
+int		is_space(char s)
 {
-	char	*str;
-	int	count;
-
-	str = NULL;
-	count = ft_strlen(s1);
-	str = malloc(sizeof(char) * (count + 1));
-	if (str == NULL)
-		return (NULL);
-	count = 0;
-	while (s1[count])
-	{
-		str[count] = s1[count];
-		count++;
-	}
-	str[count] = 0;
-	return (str);
+	if (s == 32 || (9 <= s && s <= 13))
+		return (1);
+	return (0);
 }
