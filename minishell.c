@@ -6,9 +6,8 @@ void	sigint_handler(int signo)
 {
 	printf("\n");
     rl_on_new_line();
-    // rl_replace_line("", 0);
+    rl_replace_line("", 0);
     rl_redisplay();
-	signal(SIGINT, (void *)sigint_handler);
 }
 
 void	sigquit_handler(int signo)
@@ -21,11 +20,10 @@ int			ft_isspace(char c)
 	return ((c >= 9 && c <= 13) || (c == 32));
 }
 
-int mini_pwd()
+int mini_pwd(char **envp)
 {
 	pid_t	pid;
 	char	*arg[] = {"pwd", (char *)0};
-	char	*envp[] = {"", (char *)0};
 	int		status;
 
 	pid = fork();
@@ -41,18 +39,17 @@ int mini_pwd()
 	return (-1);
 }
 
-int mini_env()
+int mini_env(char **envp)
 {
 	pid_t	pid;
 	char	*arg[] = {"env", (char *)0};
-	char	*envp[] = {"", (char *)0};
 	int		status;
 
 	pid = fork();
 	wait(&status);
 	if (pid == 0)
 	{
-		execve("/bin/env", arg, envp);
+		execve("/usr/bin/env", arg, envp);
 	}
 	else
 	{
@@ -61,11 +58,10 @@ int mini_env()
 	return (-1);
 }
 
-int mini_cd(char *dir)
+int mini_cd(char *dir, char **envp)
 {
 	pid_t	pid;
-	char	*arg[] = {"cd", dir, (char *)0};
-	char	*envp[] = {"", (char *)0};
+	char	*arg[] = {"cd", "../", (char *)0};
 	int		status;
 
 	pid = fork();
@@ -81,7 +77,7 @@ int mini_cd(char *dir)
 	return (-1);
 }
 
-int interpret(char *line)
+int interpret(char *line, char **envp)
 {
 	int		i;
 	int		ret_value;
@@ -94,7 +90,7 @@ int interpret(char *line)
 			if (!ft_isspace(line[i++]))
 				return (-1);
 		}
-		ret_value = mini_pwd();
+		ret_value = mini_pwd(envp);
 		return (ret_value);
 	}
 	if (ft_strncmp(line, "env", 3) == 0)
@@ -105,39 +101,40 @@ int interpret(char *line)
 			if (!ft_isspace(line[i++]))
 				return (-1);
 		}
-		ret_value = mini_env();
+		ret_value = mini_env(envp);
 		return (ret_value);
 	}
 	if (ft_strncmp(line, "cd", 2) == 0)
 	{
 		char **dir;
 		dir = ft_split(line, ' ');
-		ret_value = mini_cd(dir[1]);
+		ret_value = mini_cd(dir[1], envp);
 		return (ret_value);
 	}
 	return (-1);
 }
 
-int	main()
+int	main(int argc, char **argv, char **envp)
 {
 	char	buffer[1024];
 	char	*prompt;
 
 	signal(SIGINT, (void *)sigint_handler);
-	// signal(SIGQUIT, SIG_DFL);
+	// signal(SIGINT, SIG_IGN);
 	getcwd(buffer, 1024);
 	prompt = ft_strjoin(buffer, "$ ");
 	line = readline(prompt);
-	interpret(line);
+	add_history(line);
+	interpret(line, envp);
 	while (line != NULL)
 	{
 		free(line);
 		line = readline(prompt);
-		// add_history(line);
-		interpret(line);
+		add_history(line);
+		interpret(line, envp);
 	}
-	printf("%s\n", line);
-	free(line);
-	line = 0;
+	printf("line -> %s\n", line);
+	//free(line);
+	// line = 0;
 	return (0);
 }
