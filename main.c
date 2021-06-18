@@ -1,22 +1,5 @@
 #include "minishell.h"
 
-int	ft_strncmp(char *s1, char *s2, int n)
-{
-	int	len;
-	
-	if (n == 0)
-		return (0);
-	len = 0;
-	while (len + 1 < n && s1[len] && s2[len])
-	{
-		if (s1[len] == s2[len])
-			len++;
-		else
-			break ;
-	}
-	return (s1[len] - s2[len]);
-}
-
 int	is_numeric(char **split, int arg_num)
 {
 	int	i = 0;
@@ -43,17 +26,9 @@ int	main()
 	char	*line;
 	char	buffer[1024];
 	char	*prompt;
-	// char	**split;
-	// int		arg_num;
-	// int		atoi_ret;
-	// int		exit_num;
-	// int		is_num;
 
 	getcwd(buffer, 1024);
 	prompt = ft_strjoin(buffer, "$ ");
-	// write(1, buffer, ft_strlen(buffer));
-	// write(1, "$ ", 2);
-	// printf("ft_strlen : %d %s\n", ft_strlen(buffer), buffer);
 	line = readline(prompt);
 	while (line != NULL)
 	{
@@ -110,9 +85,6 @@ int	main()
 		// 	printf("zsh: command not found: %s\n", line);
 		free(line);
 		line = readline(prompt);
-		// write(1, buffer, ft_strlen(buffer));
-		// write(1, "$ ", 2);
-		// free(split);
 	}
 	printf("%s\n", line);
 	free(line);

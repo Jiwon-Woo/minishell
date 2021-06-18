@@ -3,10 +3,8 @@ LIB = libminishell.a
 CFLAGS = -Wall -Wextra -Werror
 READLINE = -L/usr/include -lreadline
 LIBFLAG = -L. -lminishell
-SOURCE = ft_gnl.c \
-		ft_split_space.c \
-		ft_atoi.c \
-		ft_strjoin.c \
+SOURCE = ft_split_space.c \
+		ft_atoi_ret_error.c \
 		echo_exception.c
 OBJECT = $(SOURCE:.c=.o)
 MAIN = main.c

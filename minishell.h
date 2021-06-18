@@ -1,8 +1,7 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-# include <unistd.h>
-# include <stdlib.h>
+# include "./libft/libft.h"
 # include <stdio.h>
 # include <math.h>
 # include <limits.h>
