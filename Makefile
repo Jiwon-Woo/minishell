@@ -1,4 +1,4 @@
-USER = jwoo
+USER = $(LOGNAME)
 NAME = minishell
 LIB = libminishell.a
 CFLAGS = -Wall -Wextra -Werror

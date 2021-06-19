@@ -19,8 +19,6 @@ char	*str_append_char(char *str, char c)
 	return (ret);
 }
 
-
-
 char	**list_to_char_arr(t_list *arg_list)
 {
 	t_list	*first;
