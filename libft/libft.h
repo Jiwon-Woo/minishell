@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/30 17:35:34 by jwoo              #+#    #+#             */
-/*   Updated: 2021/06/18 19:48:57 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/06/19 13:39:49 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ typedef struct	s_list
 	struct s_list	*next;
 }				t_list;
 
+char			*ft_itoa(int n);
 int				ft_isalnum(int c);
 int				ft_isalpha(int c);
 int				ft_isascii(int c);

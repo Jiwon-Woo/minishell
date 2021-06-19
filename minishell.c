@@ -1,10 +1,12 @@
 #include "minishell.h"
 
+// static char	*line;
+
 void	sigint_handler(int signo)
 {
 	printf("\n");
     rl_on_new_line();
-    rl_replace_line("", 0);
+    // rl_replace_line("", 0);
     rl_redisplay();
 }
 
@@ -96,14 +98,10 @@ int interpret(char **arg_arr, char **envp)
 
 	if (arg_arr[0] == 0)
 		return (0);
-	if (ft_strncmp(arg_arr[0], "pwd", 4) == 0)
+	if (ft_strncmp(arg_arr[0], "echo", 5) == 0)
 	{
-		ret_value = mini_pwd(arg_arr, envp);
-		return (ret_value);
-	}
-	if (ft_strncmp(arg_arr[0], "env", 4) == 0)
-	{
-		ret_value = mini_env(arg_arr, envp);
+		char **dir;
+		ret_value = mini_echo(arg_arr, envp);
 		return (ret_value);
 	}
 	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
@@ -112,10 +110,14 @@ int interpret(char **arg_arr, char **envp)
 		ret_value = mini_cd(arg_arr, envp);
 		return (ret_value);
 	}
-	if (ft_strncmp(arg_arr[0], "echo", 5) == 0)
+	if (ft_strncmp(arg_arr[0], "pwd", 4) == 0)
 	{
-		char **dir;
-		ret_value = mini_echo(arg_arr, envp);
+		ret_value = mini_pwd(arg_arr, envp);
+		return (ret_value);
+	}
+	if (ft_strncmp(arg_arr[0], "env", 4) == 0)
+	{
+		ret_value = mini_env(arg_arr, envp);
 		return (ret_value);
 	}
 	return (-1);
@@ -130,7 +132,7 @@ int	main(int argc, char **argv, char **envp)
 	char	*line;
 
 	signal(SIGINT, (void *)sigint_handler);
-	// signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
 	getcwd(buffer, 1024);
 	prompt = ft_strjoin(buffer, "$ ");
 	line = readline(prompt);

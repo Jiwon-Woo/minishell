@@ -68,10 +68,23 @@ t_list	*get_arg_list(char *line)
 			while (ft_isspace(*line) == 0 && *line != 0)
 				arg = str_append_char(arg, *(line++));
 		}
-		if (qnote != 0)
-			exit(1);
-		if (arg != NULL)
-			ft_lstadd_back(&arg_list, ft_lstnew(arg));
+		if (qnote == 1)
+		{
+			if (ft_strlen(arg) > 0)
+				ft_lstadd_back(&arg_list, ft_lstnew(ft_strjoin("\'", arg)));
+			qnote = 0;
+		}
+		else if (qnote == 2)
+		{
+			if (ft_strlen(arg) > 0)
+				ft_lstadd_back(&arg_list, ft_lstnew(ft_strjoin("\"", arg)));
+			qnote = 0;
+		}
+		else
+		{
+			if (arg != NULL)
+				ft_lstadd_back(&arg_list, ft_lstnew(arg));
+		}
 	}
 	return (arg_list);
 }
