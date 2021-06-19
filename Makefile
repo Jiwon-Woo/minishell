@@ -10,6 +10,7 @@ SOURCE = ft_split_space.c \
 		ft_atoi_ret_error.c \
 		echo_exception.c
 OBJECT = $(SOURCE:.c=.o)
+# MAIN = minishell.c
 MAIN = main.c
 
 TEMP = -L/usr/local/opt/ruby/lib -I/usr/local/opt/ruby/include
@@ -21,11 +22,11 @@ libft :
 
 $(NAME): $(LIB) $(MAIN) libft
 #	gcc $(MAIN) $(CFLAGS) $(LIBMINISHELL) $(LIBFT) $(LIBREADLINE) $(TEMP) -o $(NAME)
-	@gcc $(MAIN) $(CFLAGS) $(LIBMINISHELL) $(LIBFT) -L/usr/include -lreadline $(TEMP) -o $(NAME)
+	gcc $(MAIN) $(LIBMINISHELL) $(LIBFT) -L/usr/include -lreadline $(TEMP) -o $(NAME)
 $(LIB): $(OBJECT)
 	@ar rcs $(LIB) $(OBJECT)
 $(OBJECT): $(SOURCE)
-	@gcc $(CFLAGS) -c $(SOURCE)
+	@gcc -c $(SOURCE)
 
 clean:
 	@rm -f $(OBJECT)
