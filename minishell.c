@@ -94,6 +94,12 @@ int mini_cd(char **arg, char **envp)
 	// return (-1);
 }
 
+int mini_exit(char **arg, char **envp)
+{
+	printf("exit\n");
+	exit (0);
+}
+
 int mini_echo(char **arg, char **envp)
 {
 	pid_t	pid;
