@@ -17,7 +17,10 @@ char	**factor_len(char **factor, char *s, int factor_num);
 void	factor_split(char **factor, char *s, int factor_num);
 char	**free_two_dimension(char **word, int num);
 char	**ft_split_space(char *s);
-int 	get_arg_num(char *line);
+
+char	*str_append_char(char *str, char c);
+t_list	*get_arg_list(char *line);
+char	**list_to_char_arr(t_list *arg_list);
 
 int		atoi_sign(char *str);
 int		ft_atoi(char *str, int *integer);

@@ -95,34 +95,3 @@ char	**list_to_char_arr(t_list *arg_list)
 	arg_list = first;
 	return (arg_arr);
 }
-
-int	main(int argc, char **argv, char **envp)
-{
-	char	buffer[1024];
-	char	*prompt;
-	t_list 	*arg_list;
-	char	*line;
-	char	**arg_arr;
-
-	// signal(SIGINT, (void *)sigint_handler);
-	// signal(SIGINT, SIG_IGN);
-	getcwd(buffer, 1024);
-	prompt = ft_strjoin(buffer, "$ ");
-	line = readline(prompt);
-	while (line != NULL)
-	{
-		add_history(line);
-		arg_list = get_arg_list(line);
-		arg_arr = list_to_char_arr(arg_list);
-		int	i = 0;
-		while (arg_arr[i])
-		{
-			printf("%s\n", arg_arr[i++]);
-		}
-		line = readline(prompt);
-	}
-	free(prompt);
-	prompt = 0;
-	return (0);
-}
-

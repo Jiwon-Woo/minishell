@@ -1,12 +1,10 @@
 #include "minishell.h"
 
-static char	*line;
-
 void	sigint_handler(int signo)
 {
 	printf("\n");
     rl_on_new_line();
-    // rl_replace_line("", 0);
+    rl_replace_line("", 0);
     rl_redisplay();
 }
 
@@ -15,10 +13,10 @@ void	sigquit_handler(int signo)
 	exit(0);
 }
 
-int mini_pwd(char **envp)
+int mini_pwd(char **arg, char **envp)
 {
 	pid_t	pid;
-	char	*arg[] = {"pwd", (char *)0};
+	// char	*arg[] = {"pwd", (char *)0};
 	int		status;
 
 	pid = fork();
@@ -34,10 +32,10 @@ int mini_pwd(char **envp)
 	return (-1);
 }
 
-int mini_env(char **envp)
+int mini_env(char **arg, char **envp)
 {
 	pid_t	pid;
-	char	*arg[] = {"env", (char *)0};
+	// char	*arg[] = {"env", (char *)0};
 	int		status;
 
 	pid = fork();
@@ -53,10 +51,10 @@ int mini_env(char **envp)
 	return (-1);
 }
 
-int mini_cd(char *dir, char **envp)
+int mini_cd(char **arg, char **envp)
 {
 	pid_t	pid;
-	char	*arg[] = {"cd", "../", (char *)0};
+	// char	*arg[] = {"cd", "../", (char *)0};
 	int		status;
 
 	pid = fork();
@@ -72,10 +70,10 @@ int mini_cd(char *dir, char **envp)
 	return (-1);
 }
 
-int mini_echo(char *dir, char **envp)
+int mini_echo(char **arg, char **envp)
 {
 	pid_t	pid;
-	char	*arg[] = {"echo", "hello", (char *)0};
+	// char	*arg[] = {"echo", "hello", (char *)0};
 	int		status;
 
 	pid = fork();
@@ -91,45 +89,33 @@ int mini_echo(char *dir, char **envp)
 	return (-1);
 }
 
-int interpret(char *line, char **envp)
+int interpret(char **arg_arr, char **envp)
 {
 	int		i;
 	int		ret_value;
 
-	if (ft_strncmp(line, "pwd", 3) == 0)
+	if (arg_arr[0] == 0)
+		return (0);
+	if (ft_strncmp(arg_arr[0], "pwd", 4) == 0)
 	{
-		i = 3;
-		while (line[i])
-		{
-			if (!ft_isspace(line[i++]))
-				return (-1);
-		}
-		ret_value = mini_pwd(envp);
+		ret_value = mini_pwd(arg_arr, envp);
 		return (ret_value);
 	}
-	if (ft_strncmp(line, "env", 3) == 0)
+	if (ft_strncmp(arg_arr[0], "env", 4) == 0)
 	{
-		i = 3;
-		while (line[i])
-		{
-			if (!ft_isspace(line[i++]))
-				return (-1);
-		}
-		ret_value = mini_env(envp);
+		ret_value = mini_env(arg_arr, envp);
 		return (ret_value);
 	}
-	if (ft_strncmp(line, "cd", 2) == 0)
+	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
 	{
 		char **dir;
-		dir = ft_split_space(line);
-		ret_value = mini_cd(dir[1], envp);
+		ret_value = mini_cd(arg_arr, envp);
 		return (ret_value);
 	}
-	if (ft_strncmp(line, "echo", 4) == 0)
+	if (ft_strncmp(arg_arr[0], "echo", 5) == 0)
 	{
 		char **dir;
-		dir = ft_split_space(line);
-		ret_value = mini_echo(dir[1], envp);
+		ret_value = mini_echo(arg_arr, envp);
 		return (ret_value);
 	}
 	return (-1);
@@ -139,6 +125,9 @@ int	main(int argc, char **argv, char **envp)
 {
 	char	buffer[1024];
 	char	*prompt;
+	t_list	*arg_list;
+	char	**arg_arr;
+	char	*line;
 
 	signal(SIGINT, (void *)sigint_handler);
 	// signal(SIGINT, SIG_IGN);
@@ -148,7 +137,9 @@ int	main(int argc, char **argv, char **envp)
 	while (line != NULL)
 	{
 		add_history(line);
-		interpret(line, envp);
+		arg_list = get_arg_list(line);
+		arg_arr = list_to_char_arr(arg_list);
+		interpret(arg_arr, envp);
 		free(line);
 		line = readline(prompt);
 	}
