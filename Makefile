@@ -20,7 +20,7 @@ libft :
 	@make -C ./libft all
 
 $(NAME): $(LIB) $(MAIN) libft
-	gcc $(MAIN) $(LIBMINISHELL) $(LIBFT) $(LIBREADLINE) -o $(NAME)
+	gcc $(MAIN) -g $(LIBMINISHELL) $(LIBFT) $(LIBREADLINE) -o $(NAME)
 #	gcc $(MAIN) $(LIBMINISHELL) $(LIBFT) -L/usr/include -lreadline $(TEMP) -o $(NAME)
 $(LIB): $(OBJECT)
 	@ar rcs $(LIB) $(OBJECT)

@@ -1,5 +1,14 @@
 #include "minishell.h"
 
+typedef	struct s_qnote
+{
+	int	q_single;
+	int	q_double;
+	int	q_single_index;
+	int	q_double_index;
+}	t_qnote;
+
+
 char	*str_append_char(char *str, char c)
 {
 	char	*ret;
@@ -103,15 +112,21 @@ int	main(int argc, char **argv, char **envp)
 	t_list 	*arg_list;
 	char	*line;
 	char	**arg_arr;
+	t_qnote	qnote;
 
 	// signal(SIGINT, (void *)sigint_handler);
 	// signal(SIGINT, SIG_IGN);
 	getcwd(buffer, 1024);
 	prompt = ft_strjoin(buffer, "$ ");
 	line = readline(prompt);
+	qnote.q_single = 1;
+	qnote.q_double = 1;
+	qnote.q_single_index = -1;
+	qnote.q_double_index = -1;
 	while (line != NULL)
 	{
 		add_history(line);
+		check_qnote(line, &qnote);
 		arg_list = get_arg_list(line);
 		arg_arr = list_to_char_arr(arg_list);
 		int	i = 0;

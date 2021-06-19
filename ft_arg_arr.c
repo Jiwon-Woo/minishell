@@ -14,80 +14,12 @@ char	*str_append_char(char *str, char c)
 		ret[i] = str[i];
 	ret[i] = c;
 	ret[i + 1] = 0;
-	// free(str);
+	free(str);
 	str = 0;
 	return (ret);
 }
 
-t_list	*get_arg_list(char *line)
-{
-	t_list 	*arg_list = 0;
-	char	*arg;
-	int	qnote = 0;
 
-	while (ft_isspace(*line))
-		line++;
-	while (ft_isspace(*line) == 0 && *line != 0)
-		arg = str_append_char(arg, *(line++));
-	ft_lstadd_back(&arg_list, ft_lstnew(arg));
-	while (*line)
-	{
-		arg = ft_strdup("");
-		while (ft_isspace(*line))
-			line++;
-		if (*line == '\"' || *line == '\'')
-		{
-			if (*line == '\"')
-				qnote = 2;
-			else
-				qnote = 1;
-			line++;
-		}
-		if (qnote == 1)
-		{
-			while (*line != '\'' && *line != 0)
-				arg = str_append_char(arg, *(line++));
-			if (*line == '\'')
-			{
-				qnote = 0;
-				line++;
-			}
-		}
-		else if (qnote == 2)
-		{
-			while (*line != '\"' && *line != 0)
-				arg = str_append_char(arg, *(line++));
-			if (*line == '\"')
-			{
-				qnote = 0;
-				line++;
-			}
-		}
-		else 
-		{
-			while (ft_isspace(*line) == 0 && *line != 0)
-				arg = str_append_char(arg, *(line++));
-		}
-		if (qnote == 1)
-		{
-			if (ft_strlen(arg) > 0)
-				ft_lstadd_back(&arg_list, ft_lstnew(ft_strjoin("\'", arg)));
-			qnote = 0;
-		}
-		else if (qnote == 2)
-		{
-			if (ft_strlen(arg) > 0)
-				ft_lstadd_back(&arg_list, ft_lstnew(ft_strjoin("\"", arg)));
-			qnote = 0;
-		}
-		else
-		{
-			if (arg != NULL)
-				ft_lstadd_back(&arg_list, ft_lstnew(arg));
-		}
-	}
-	return (arg_list);
-}
 
 char	**list_to_char_arr(t_list *arg_list)
 {
