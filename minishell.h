@@ -14,7 +14,12 @@
 
 # define NONE 0
 # define PIPE 1
-# define REDIRECT 2
+# define REDIRECT1 2
+# define REDIRECT2 3
+# define REDIRECT3 4
+# define REDIRECT4 5
+# define AND 6
+# define OR 7
 
 typedef	struct s_quote
 {
@@ -32,7 +37,9 @@ char	**ft_split_space(char *s);
 
 char	*str_append_char(char *str, char c);
 t_list	*get_arg_list(char *line, t_quote quote);
-char	**list_to_char_arr(t_list *arg_list);
+t_list	*list_to_char_arr(t_list *arg_list);
+void	check_quote(char *line, t_quote *quote);
+void 	init_quote(t_quote *quote);
 
 int		atoi_sign(char *str);
 int		ft_atoi(char *str, int *integer);

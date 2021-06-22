@@ -19,22 +19,113 @@ char	*str_append_char(char *str, char c)
 	return (ret);
 }
 
-char	**list_to_char_arr(t_list *arg_list)
+int	is_separate(char *command)
+{
+	if (ft_strncmp(command, "|", 2) == 0)
+		return (1);
+	if (ft_strncmp(command, "<", 2) == 0)
+		return (2);
+	if (ft_strncmp(command, ">", 2) == 0)
+		return (3);
+	if (ft_strncmp(command, "<<", 3) == 0)
+		return (4);
+	if (ft_strncmp(command, ">>", 3) == 0)
+		return (5);
+	if (ft_strncmp(command, "&&", 3) == 0)
+		return (6);
+	if (ft_strncmp(command, "||", 3) == 0)
+		return (7);
+	return (0);
+}
+
+int	get_list_size(t_list *arg_list)
+{
+	int	size;
+	t_list	*first;
+
+	size = 0;
+	first = arg_list;
+	while (arg_list)
+	{
+		if (is_separate((char *)arg_list->content) > 0)
+			break;
+		size++;
+		arg_list = arg_list->next;
+	}
+	arg_list = first;
+	return (size);
+}
+
+char	*remove_qnote(char *cmd_line)
+{
+	int	i = 0;
+	t_quote quote;
+	char	*ret = 0;
+
+	init_quote(&quote);
+	check_quote(cmd_line, &quote);
+	ret = ft_strdup("");
+	while (cmd_line[i])
+	{
+		if ((cmd_line[i] == '\"' && i != quote.q_double_index) ||
+			(cmd_line[i] == '\'' && i != quote.q_single_index))
+		{	
+			if (cmd_line[i++] == '\'')
+			{
+				while (cmd_line[i] != '\'' && cmd_line[i] != 0)
+					ret = str_append_char(ret, cmd_line[i++]);
+				if (cmd_line[i] == '\'')
+					i++;
+			}
+			else
+			{
+				while (cmd_line[i] != '\"' && cmd_line[i] != 0)
+					ret = str_append_char(ret, cmd_line[i++]);
+				if (cmd_line[i] == '\"')
+					i++;
+			}
+		}
+		else
+		{
+			if (cmd_line[i] == '\'' || cmd_line[i] == '\"')
+				ret = str_append_char(ret, cmd_line[i++]);
+			while (cmd_line[i] != '\'' && cmd_line[i] != '\"' && cmd_line[i] != 0)
+				ret = str_append_char(ret, cmd_line[i++]);
+		}
+	}
+	return (ret);
+}
+
+t_list	*list_to_char_arr(t_list *arg_list)
 {
 	t_list	*first;
+	t_list	*cmd_list = 0;
 	int	lst_size;
 	int	idx;
 	char	**arg_arr;
 
 	lst_size = ft_lstsize(arg_list);
-	arg_arr = (char **)malloc(sizeof(char *) * (lst_size + 1));
-	idx = -1;
-	while (++idx < lst_size)
+	first = arg_list;
+	while (arg_list)
 	{
-		arg_arr[idx] = (char *)arg_list->content;
-		arg_list = arg_list->next;
+		// lst_size = get_list_size(arg_list);
+		int	sperate_num = get_list_size(arg_list);
+		arg_arr = (char **)malloc(sizeof(char *) * (sperate_num + 1));
+		idx = -1;
+		while (++idx < sperate_num)
+		{
+			arg_arr[idx] = remove_qnote((char *)arg_list->content);
+			arg_list = arg_list->next;
+		}
+		arg_arr[sperate_num] = (char *)0;
+		t_list *temp = ft_lstnew(arg_arr);
+		ft_lstadd_back(&cmd_list, temp);
+		if (arg_list != NULL)
+		{
+			temp->pipe_redirect = is_separate((char *)arg_list->content);
+			arg_list = arg_list->next;
+		}
 	}
-	arg_arr[lst_size] = (char *)0;
 	arg_list = first;
-	return (arg_arr);
+	return (cmd_list);
 }

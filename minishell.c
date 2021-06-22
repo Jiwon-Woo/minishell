@@ -16,7 +16,7 @@ void	sigint_handler(int signo)
 {
 	printf("\n");
     rl_on_new_line();
-    rl_replace_line("", 0);
+    // rl_replace_line("", 0);
     rl_redisplay();
 }
 
@@ -119,6 +119,24 @@ int mini_echo(char **arg, char **envp)
 	return (-1);
 }
 
+int mini_ls(char **arg, char **envp)
+{
+	pid_t	pid;
+	int		status;
+
+	pid = fork();
+	wait(&status);
+	if (pid == 0)
+	{
+		execve("/bin/ls", arg, envp);
+	}
+	else
+	{
+		return (status);
+	}
+	return (-1);
+}
+
 int interpret(char **arg_arr, char **envp)
 {
 	int		i;
@@ -135,11 +153,16 @@ int interpret(char **arg_arr, char **envp)
 	if (ft_strncmp(arg_arr[0], "env", 4) == 0)
 		return (mini_env(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0], "export", 7) == 0)
-		return (mini_export(arg_arr, envp));
+		return (0);
+	// 	return (mini_export(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
-		return (mini_unset(arg_arr, envp));
+		return (0);
+	// 	return (mini_unset(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
 		return (mini_exit(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "ls", 3) == 0)
+		return (mini_ls(arg_arr, envp));
+	printf("bash: %s: command not found\n", arg_arr[0]);
 	return (-1);
 }
 
@@ -167,7 +190,7 @@ void	check_quote(char *line, t_quote *quote)
 		quote->q_double_index = -1;
 }
 
-t_list	* get_arg_list(char *line, t_quote quote)
+t_list	*get_arg_list(char *line, t_quote quote)
 {
 	t_list 	*arg_list = 0;
 	char	*arg;
@@ -176,30 +199,41 @@ t_list	* get_arg_list(char *line, t_quote quote)
 	while (line[i])
 	{
 		arg = 0;
-		while (ft_isspace(line[i]) && line[i] != 0)
+		while (ft_isspace(line[i]) == 1 && line[i] != 0)
 			i++;
-		if ((line[i] == '\"' && i != quote.q_double_index) ||
-			(line[i] == '\'' && i != quote.q_single_index))
-		{	
-			if (line[i] == '\'')
-			{
-				arg = str_append_char(arg, line[i++]);
-				while (line[i] != '\'' && line[i] != 0)
+		while (line[i])
+		{
+			if ((line[i] == '\"' && i != quote.q_double_index) ||
+				(line[i] == '\'' && i != quote.q_single_index))
+			{	
+				if (line[i] == '\'')
+				{
 					arg = str_append_char(arg, line[i++]);
+					while (line[i] != '\'' && line[i] != 0)
+						arg = str_append_char(arg, line[i++]);
+					if (line[i] != 0)
+						arg = str_append_char(arg, line[i++]);
+				}
+				else
+				{
+					arg = str_append_char(arg, line[i++]);
+					while (line[i] != '\"' && line[i] != 0)
+						arg = str_append_char(arg, line[i++]);
+					if (line[i] != 0)
+						arg = str_append_char(arg, line[i++]);
+				}
+				// while (ft_isspace(line[i]) == 0 && line[i] != 0 && line[i] != '\'' && line[i] != '\"')
+				// 	arg = str_append_char(arg, line[i++]);
 			}
 			else
 			{
-				arg = str_append_char(arg, line[i++]);
-				while (line[i] != '\"' && line[i] != 0)
+				if (line[i] == '\'' || line[i] == '\"')
+					arg = str_append_char(arg, line[i++]);
+				while (ft_isspace(line[i]) == 0 && line[i] != 0 && line[i] != '\'' && line[i] != '\"')
 					arg = str_append_char(arg, line[i++]);
 			}
-			while (ft_isspace(line[i]) == 0 && line[i] != 0)
-				arg = str_append_char(arg, line[i++]);
-		}
-		else
-		{
-			while (ft_isspace(line[i]) == 0 && line[i] != 0)
-				arg = str_append_char(arg, line[i++]);
+			if (ft_isspace(line[i]) == 1 || line[i] == 0)
+				break ;
 		}
 		if (arg != NULL)
 			ft_lstadd_back(&arg_list, ft_lstnew(arg));
@@ -246,8 +280,16 @@ int	main(int argc, char **argv, char **envp)
 		add_history(line);
 		check_quote(line, &quote);
 		arg_list = get_arg_list(line, quote);
-		arg_arr = list_to_char_arr(arg_list);
-		interpret(arg_arr, envp);
+		cmd_list = list_to_char_arr(arg_list);
+		// printf("cmd_list lstsize : %d\n", ft_lstsize(cmd_list));
+		t_list *temp = cmd_list;
+		while (cmd_list)
+		{
+			arg_arr = (char **)cmd_list->content;
+			interpret(arg_arr, envp);
+			cmd_list = cmd_list->next;
+		}
+		cmd_list = temp;
 		free(line);
 		free(prompt);
 		prompt = make_prompt();
