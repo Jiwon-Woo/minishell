@@ -3,6 +3,7 @@
 		"minishell.h": "c",
 		"stdio.h": "c",
 		"sstream": "c",
-		"history.h": "c"
+		"history.h": "c",
+		"__node_handle": "c"
 	}
 }

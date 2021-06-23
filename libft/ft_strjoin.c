@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/02 16:44:23 by jwoo              #+#    #+#             */
-/*   Updated: 2021/06/18 14:45:38 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/06/23 21:39:33 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,12 @@ char	*ft_strjoin(char *s1, char *s2)
 	int		index;
 	int		i;
 
-	if (s1 == 0 || s2 == 0)
+	if (s1 == 0 && s2 == 0)
 		return (0);
+	else if (s1 == 0)
+		return (s2);
+	else if (s2 == 0)
+		return (s1);
 	len1 = ft_strlen(s1);
 	len2 = ft_strlen(s2);
 	str = (char *)malloc(sizeof(char) * (len1 + len2 + 1));

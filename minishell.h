@@ -37,12 +37,15 @@ char	**ft_split_space(char *s);
 
 char	*str_append_char(char *str, char c);
 t_list	*get_arg_list(char *line, t_quote quote);
-t_list	*list_to_char_arr(t_list *arg_list);
+t_list	*list_to_char_arr(t_list *arg_list, char **envp);
 void	check_quote(char *line, t_quote *quote);
 void 	init_quote(t_quote *quote);
 
 int		atoi_sign(char *str);
 int		ft_atoi(char *str, int *integer);
+
+int		get_equal_idx(char *env_line);
+char	*get_value(char *key, char **envp);
 
 
 #endif

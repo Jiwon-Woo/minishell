@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-//$처리, 환경변수 관련 함수, " ' 제거, string not in pwd ?, 파이프 및 리다이렉션, $? 처리, 보너스??
+//환경변수 관련 함수(export, unset), string not in pwd ?, 파이프 및 리다이렉션, $? 처리, 보너스?? (^C , && 및 || , *) 
 
 int		get_arg_size(char **arg)
 {
@@ -14,10 +14,11 @@ int		get_arg_size(char **arg)
 
 void	sigint_handler(int signo)
 {
-	printf("\n");
+    rl_replace_line("", 0);
     rl_on_new_line();
-    // rl_replace_line("", 0);
     rl_redisplay();
+	printf("\n");
+	// write(1, "\b\b", 2);
 }
 
 void	sigquit_handler(int signo)
@@ -280,7 +281,7 @@ int	main(int argc, char **argv, char **envp)
 		add_history(line);
 		check_quote(line, &quote);
 		arg_list = get_arg_list(line, quote);
-		cmd_list = list_to_char_arr(arg_list);
+		cmd_list = list_to_char_arr(arg_list, envp);
 		// printf("cmd_list lstsize : %d\n", ft_lstsize(cmd_list));
 		t_list *temp = cmd_list;
 		while (cmd_list)
@@ -295,6 +296,7 @@ int	main(int argc, char **argv, char **envp)
 		prompt = make_prompt();
 		line = readline(prompt);
 	}
+	printf("exit\n");
 	free(prompt);
 	prompt = 0;
 	return (0);
