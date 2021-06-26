@@ -98,8 +98,8 @@ char	*remove_qnote(char *cmd_line, char **envp)
 							ret = str_append_char(ret, '$');
 						else
 						{
-							// char *value = get_value(key, envp);
-							char *value = getenv(key);
+							char *value = get_value(key, envp);
+							// char *value = getenv(key);
 							ret = ft_strjoin(ret, value);
 						}
 					}
@@ -121,7 +121,7 @@ char	*remove_qnote(char *cmd_line, char **envp)
 	return (ret);
 }
 
-t_list	*list_to_char_arr(t_list *arg_list, char **envp)
+t_list	*list_to_char_arr(t_list *arg_list, t_envp *envp)
 {
 	t_list	*first;
 	t_list	*cmd_list = 0;
@@ -139,7 +139,7 @@ t_list	*list_to_char_arr(t_list *arg_list, char **envp)
 		idx = -1;
 		while (++idx < sperate_num)
 		{
-			arg_arr[idx] = remove_qnote((char *)arg_list->content, envp);
+			arg_arr[idx] = remove_qnote((char *)arg_list->content, envp->envp_list);
 			arg_list = arg_list->next;
 		}
 		arg_arr[sperate_num] = (char *)0;

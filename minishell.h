@@ -29,6 +29,13 @@ typedef	struct s_quote
 	int	q_double_index;
 }	t_quote;
 
+typedef	struct s_envp
+{
+	char	**envp_list;
+	int		*sort_idx;
+	int		last_status;
+}	t_envp;
+
 int		factor_num(char *s);
 char	**factor_len(char **factor, char *s, int factor_num);
 void	factor_split(char **factor, char *s, int factor_num);
@@ -37,7 +44,7 @@ char	**ft_split_space(char *s);
 
 char	*str_append_char(char *str, char c);
 t_list	*get_arg_list(char *line, t_quote quote);
-t_list	*list_to_char_arr(t_list *arg_list, char **envp);
+t_list	*list_to_char_arr(t_list *arg_list, t_envp *envp);
 void	check_quote(char *line, t_quote *quote);
 void 	init_quote(t_quote *quote);
 
