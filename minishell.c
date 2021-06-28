@@ -3,6 +3,7 @@
 // 파이프 및 리다이렉션, $? 처리, 보너스?? (&& 및 ||, *), string not in pwd ?
 
 void	sort_envp_idx(t_envp *envp);
+void	file_or_directory(char *arg);
 
 int		get_arg_size(char **arg)
 {
@@ -222,35 +223,70 @@ int mini_exit()
 	exit (0);
 }
 
+char *parse_path(t_envp *envp)//path 환경변수 받아오기
+{
+	int flag;
+	int idx;
+
+	idx = -1;
+	flag = -1;
+	while (++idx < get_arg_size(envp->envp_list))
+	{
+		if ((get_equal_idx(envp->envp_list[idx]) == ft_strlen("PATH") && ft_strncmp(envp->envp_list[idx], "PATH", 4) == 0)
+			|| ft_strncmp("PATH", envp->envp_list[idx], 5) == 0)
+			flag = idx;
+	}
+	if (flag == -1)
+		return (0);
+	// char *ret = ft_strdup(envp->envp_list[flag] + 5);
+	// printf("path -> %s\n", ret);
+	return (ft_strdup(envp->envp_list[flag] + 5));
+}
+
 int mini_echo(char **arg, t_envp *envp, int last_slash)
 {
 	pid_t	pid;
 	int		status;
-	char	*path = ft_strdup("/bin/echo");
+	char	*path = ft_strdup(arg[0]);
+	struct 	stat sb;
+	int		i;
+	char 	**path_ = 0;
 
-	// printf("arg[0] = %s\n", arg[0]);
-	if (last_slash > -1)
+	if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
 	{
-		free(path);
-		path = ft_strdup(arg[0]);
+		// free(path);
+		// path = ft_strdup(arg[0]);
+		path_ = ft_split(parse_path(envp), ':');
+		i = -1;
+		while(path_ != 0 && path != 0 && path_[++i])
+		{
+			if (path != 0)
+				free(path);
+			path = ft_strjoin(path_[i], "/echo");
+			if (stat(path, &sb) == 0)
+				break ;
+		}
+		if (path_ == 0 || path_[i] == 0)
+		{
+			if (path != 0)
+				free(path);
+			path = 0;
+		}
+	}
+	if (path == 0 || stat(path, &sb) == -1)
+	{
+		file_or_directory(path);
+		return (-1);
 	}
 	pid = fork();
 	wait(&status);
-	if (pid == 0)
+	if (pid == 0) 
 	{
-		// if (last_slash == -1)
 		execve(path, arg, envp->envp_list);
-		// if (last_slash == -1)
-		// 	execve("/bin/echo", arg, envp->envp_list);
 	}
 	else
 	{
 		free(path);
-		printf("%d\n", status);
-		if (status < 0)
-		{
-			printf("bash: %s: No such file or directory\n", arg[0]);
-		}
 		return (status);
 	}
 	return (-1);
@@ -348,6 +384,65 @@ int	get_last_slash_idx(char *arg)
 	return (last);
 }
 
+int get_file_type(char *path)
+{
+	struct	stat sb;
+	// path = ft_strjoin(path, slash[i]);
+	// printf("%d\n", stat(path, &sb));
+	if (stat(path, &sb) == -1)
+		return (-1);
+	else if ((S_IFMT & sb.st_mode) == S_IFDIR)
+		return (1); // dir
+	else
+		return (0); // file
+	// path = ft_strjoin(path, "/");
+	// printf("%d\n", stat(path, &sb));
+}
+
+void	file_or_directory(char *arg)
+{
+	int	first_slash = 0; // Absolute Path
+	int	last_slash = 0; // Dir
+	char	**slash;
+	int	i = 0;
+	char	*path = 0;
+	int	type;
+
+	if (arg[0] == '/')
+		first_slash = 1;
+	if (arg[ft_strlen(arg) - 1] == '/')
+		last_slash = 1;
+	slash = ft_split(arg, '/');
+	if (first_slash == 1)
+		path = ft_strjoin(path, "/");
+	path = ft_strjoin(path, slash[0]);
+	while ((type = get_file_type(path)) > 0 && slash[++i]) // 디렉토리 다 스킵
+	{
+		// printf("%s : %d\n", path, type);
+		path = ft_strjoin(path, "/");
+		path = ft_strjoin(path, slash[i]);
+		// type = get_file_type(path);
+	}
+	if (type == 0 && slash[i + 1] == 0)
+		i++;
+	if ((slash[i] != 0 && type == 0) || (slash[i] == 0 && type == 0 && last_slash == 1))
+	{
+		printf("bash: %s: Not a directory\n", arg);
+	}
+	else if (type == -1)
+	{
+		printf("bash: %s: No such file or directory\n", arg);
+	}
+	else if (slash[i] == 0 && type == 1)
+	{
+		printf("bash: %s: is a directory\n", arg);
+	}
+	else
+	{
+		printf("bash: %s: is a file\n", arg);
+	}
+}
+
 int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
 {
 	int		i;
@@ -380,7 +475,10 @@ int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기
 		return (mini_status(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0] + last_slash + 1, "ls", 3) == 0)
 		return (mini_ls(arg_arr, envp));
-	printf("bash: %s: command not found\n", arg_arr[0]);
+	if (last_slash == -1)
+		printf("bash: %s: command not found\n", arg_arr[0]);
+	else
+		file_or_directory(arg_arr[0]);
 	return (-1);
 }
 

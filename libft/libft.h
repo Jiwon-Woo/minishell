@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/30 17:35:34 by jwoo              #+#    #+#             */
-/*   Updated: 2021/06/19 17:27:51 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/06/28 19:43:49 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,5 +43,6 @@ char			*ft_strdup(char *s1);
 char			*ft_strjoin(char *s1, char *s2);
 int				ft_strlen(char *s);
 int				ft_strncmp(char *s1, char *s2, int n);
+char			**ft_split(char *s, char c);
 
 #endif
