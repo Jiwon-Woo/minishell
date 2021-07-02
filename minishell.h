@@ -10,6 +10,8 @@
 # include <readline/history.h>
 # include <stdlib.h>
 # include <unistd.h>
+# include <errno.h>
+# include <string.h>
 # include "libft/libft.h"
 
 # define NONE 0

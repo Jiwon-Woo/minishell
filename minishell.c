@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-// 파이프 및 리다이렉션, $? 처리, 보너스?? (&& 및 ||, *), string not in pwd ?
+// 파이프 및 리다이렉션, $? 처리, 보너스?? (&& 및 ||, *), string not in pwd ?, arg 갯수 - 에러?,
 
 void	sort_envp_idx(t_envp *envp);
 void	file_or_directory(char *arg);
@@ -99,7 +99,7 @@ int		mini_export(char **arg_arr, t_envp *envp)
 	{
 		// printf("arg_[1] = %s\n", arg_arr[1]);
 		print_export(envp);
-		return (1);
+		return (0);
 	}
 	while (arg_arr[i])
 	{
@@ -146,31 +146,31 @@ int		mini_export(char **arg_arr, t_envp *envp)
 		i++;
 	}
 	sort_envp_idx(envp);
-	return (1);
+	return (0);
 }
 
 int mini_pwd(char **arg, t_envp *envp)
 {
 	pid_t	pid;
-	// char	*arg[] = {"pwd", (char *)0};
+	char	*arg_temp[] = {"pwd", (char *)0};
 	int		status;
 
-	if (get_arg_size(arg) > 1)
-	{
-		printf("%s : too many arguments\n", arg[0]);
-		return (-1);
-	}
+	// if (get_arg_size(arg) > 1)
+	// {
+	// 	printf("%s : too many arguments\n", arg[0]);
+	// 	return (1);
+	// }
 	pid = fork();
 	wait(&status);
 	if (pid == 0)
 	{
-		execve("/bin/pwd", arg, envp->envp_list);
+		execve("/bin/pwd", arg_temp, envp->envp_list);
 	}
 	else
 	{
 		return (status);
 	}
-	return (-1);
+	return (1);
 }
 
 int mini_env(char **arg, t_envp *envp)
@@ -184,13 +184,12 @@ int mini_env(char **arg, t_envp *envp)
 	if (pid == 0)
 	{
 		execve("/usr/bin/env", arg, envp->envp_list);
-		return (-1);
 	}
 	else
 	{
 		return (status);
 	}
-	return (-1);
+	return (1);
 }
 
 int mini_cd(char **arg)
@@ -198,17 +197,17 @@ int mini_cd(char **arg)
 	pid_t	pid;
 	int		status;
 
-	if (get_arg_size(arg) > 2)
-	{
-		printf("%s : too many arguments\n", arg[0]);
-		return (-1);
-	}
+	// if (get_arg_size(arg) > 2)
+	// {
+	// 	printf("%s : too many arguments\n", arg[0]);
+	// 	return (1);
+	// }
 	// pid = fork();
 	// wait(&status);
 	// if (pid == 0)
 	// {
 	// execve("/usr/bin/cd", arg, envp);
-	return (chdir(arg[1]));
+	return (chdir(arg[1]) == -1);
 	// }
 	// else
 	// {
@@ -273,23 +272,32 @@ int mini_echo(char **arg, t_envp *envp, int last_slash)
 			path = 0;
 		}
 	}
-	if (path == 0 || stat(path, &sb) == -1)
-	{
-		file_or_directory(path);
-		return (-1);
-	}
+	// if (path == 0 || stat(path, &sb) == -1)
+	// {
+	// 	file_or_directory(path);
+	// 	return (1);
+	// }
 	pid = fork();
 	wait(&status);
 	if (pid == 0) 
 	{
-		execve(path, arg, envp->envp_list);
+		int stat = execve(path, arg, envp->envp_list);
+		printf("stat : %d\n", stat);
+		// exit(execve(path, arg, envp->envp_list) < 0);
+		if (stat == -1)
+		{
+			printf("error!\n");
+			exit (1);
+		}
 	}
 	else
 	{
 		free(path);
+		printf("%s\n", strerror(errno));
+		printf("status____ : %d\n", status >> 8);
 		return (status);
 	}
-	return (-1);
+	return (1);
 }
 
 int mini_ls(char **arg, t_envp *envp)
@@ -307,7 +315,7 @@ int mini_ls(char **arg, t_envp *envp)
 	{
 		return (status);
 	}
-	return (-1);
+	return (1);
 }
 
 int mini_unset(char **arg, t_envp *envp)
@@ -319,7 +327,7 @@ int mini_unset(char **arg, t_envp *envp)
 
 	size = get_arg_size(arg);
 	if (size == 1)
-		return (-1);
+		return (1);
 	i = 0;
 	while (++i < size)
 	{
@@ -353,7 +361,7 @@ int mini_unset(char **arg, t_envp *envp)
 		}
 	}
 	sort_envp_idx(envp);
-	return (1);
+	return (0);
 }
 
 int mini_status(char **arg_arr, t_envp *envp)
@@ -366,7 +374,7 @@ int mini_status(char **arg_arr, t_envp *envp)
 	write(1, status, ft_strlen(status));
 	free(status);
 	write(1, ": command not found\n", ft_strlen(": command not found\n"));
-	return (1);
+	return (127);
 }
 
 int	get_last_slash_idx(char *arg)
@@ -479,7 +487,7 @@ int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기
 		printf("bash: %s: command not found\n", arg_arr[0]);
 	else
 		file_or_directory(arg_arr[0]);
-	return (-1);
+	return (127);
 }
 
 void	check_quote(char *line, t_quote *quote)

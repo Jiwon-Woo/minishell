@@ -56,7 +56,7 @@ int	get_list_size(t_list *arg_list)
 	return (size);
 }
 
-char	*remove_qnote(char *cmd_line, char **envp)
+char	*remove_qnote(char *cmd_line, t_envp *envp)
 {
 	int	i = 0;
 	t_quote quote;
@@ -85,7 +85,7 @@ char	*remove_qnote(char *cmd_line, char **envp)
 					{
 						char *key = 0;
 						i++;
-						while (cmd_line[i] != '\"' && cmd_line[i] != '$' && ft_isspace(cmd_line[i]) == 0)
+						while (cmd_line[i] != '\"' && cmd_line[i] != '$' && cmd_line[i] != '?' && ft_isspace(cmd_line[i]) == 0)
 						{
 							key = str_append_char(key, cmd_line[i++]);
 						}
@@ -94,11 +94,16 @@ char	*remove_qnote(char *cmd_line, char **envp)
 							key = ft_strdup("$");
 							i++;
 						}
-						if (key == 0)
+						if (key == 0 && cmd_line[i] == '?')
+						{
+							ret = ft_strjoin(ret, ft_itoa(envp->last_status));
+							i++;
+						}
+						else if (key == 0)
 							ret = str_append_char(ret, '$');
 						else
 						{
-							char *value = get_value(key, envp);
+							char *value = get_value(key, envp->envp_list);
 							// char *value = getenv(key);
 							ret = ft_strjoin(ret, value);
 						}
@@ -139,7 +144,7 @@ t_list	*list_to_char_arr(t_list *arg_list, t_envp *envp)
 		idx = -1;
 		while (++idx < sperate_num)
 		{
-			arg_arr[idx] = remove_qnote((char *)arg_list->content, envp->envp_list);
+			arg_arr[idx] = remove_qnote((char *)arg_list->content, envp);
 			arg_list = arg_list->next;
 		}
 		arg_arr[sperate_num] = (char *)0;
