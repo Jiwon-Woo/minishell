@@ -3,7 +3,7 @@
 // 파이프 및 리다이렉션, $? 처리, 보너스?? (&& 및 ||, *), string not in pwd ?, arg 갯수 - 에러?,
 
 void	sort_envp_idx(t_envp *envp);
-void	file_or_directory(char *arg);
+int	file_or_directory(char *arg);
 
 int		get_arg_size(char **arg)
 {
@@ -272,26 +272,37 @@ int mini_echo(char **arg, t_envp *envp, int last_slash)
 			path = 0;
 		}
 	}
-	// if (path == 0 || stat(path, &sb) == -1)
-	// {
-	// 	file_or_directory(path);
-	// 	return (1);
-	// }
+	if (path == 0 || stat(path, &sb) == -1)
+	{
+		// file_or_directory(path);
+		return (file_or_directory(path));
+	}
 	pid = fork();
 	wait(&status);
 	if (pid == 0) 
 	{
-		int stat = execve(path, arg, envp->envp_list);
-		printf("stat : %d\n", stat);
+		if (execve(path, arg, envp->envp_list) == -1)
+			return (1);
+		// file_or_directory(path);
 		// exit(execve(path, arg, envp->envp_list) < 0);
-		if (stat == -1)
-		{
-			printf("error!\n");
-			exit (1);
-		}
+		// if (stat == -1)
+		// {
+		// 	printf("error!\n");
+		// 	exit (1);
+		// }
+		// WIFEXITED(status) : 자식 프로세스 정상 종료시 true 
+		// WEXITSTATUS(status) : 자식 프로세스가 정상 종료되었을 때 반환한값
+		// WIFSIGNALED(status) : 자식 프로세스가 시그널에 종료되면 true
+		// WTERMSIG(status) : 자식 프로세스 종료 시그널 넘버 반환
+		// WCOREDUMP(status) : 자식이 코어덤프를 만든 경우 true
+		// WIFSTOPPED(status) : 자식 프로세스가 시그널에 중지된경우 true
 	}
 	else
 	{
+		if(WIFEXITED(status))
+			printf("Normal exit: exit(%d)\n", WEXITSTATUS(status));
+		else if(WIFSIGNALED(status))
+			printf("Incorrect exit: signo(%d) %s\n", WTERMSIG(status), WCOREDUMP(status)?"(core dumped)":"");
 		free(path);
 		printf("%s\n", strerror(errno));
 		printf("status____ : %d\n", status >> 8);
@@ -407,7 +418,7 @@ int get_file_type(char *path)
 	// printf("%d\n", stat(path, &sb));
 }
 
-void	file_or_directory(char *arg)
+int	file_or_directory(char *arg)
 {
 	int	first_slash = 0; // Absolute Path
 	int	last_slash = 0; // Dir
@@ -436,24 +447,29 @@ void	file_or_directory(char *arg)
 	if ((slash[i] != 0 && type == 0) || (slash[i] == 0 && type == 0 && last_slash == 1))
 	{
 		printf("bash: %s: Not a directory\n", arg);
+		return (126);
 	}
 	else if (type == -1)
 	{
 		printf("bash: %s: No such file or directory\n", arg);
+		return (127);
 	}
 	else if (slash[i] == 0 && type == 1)
 	{
 		printf("bash: %s: is a directory\n", arg);
+		return(126);
 	}
 	else
 	{
 		printf("bash: %s: is a file\n", arg);
 	}
+	return (0);
 }
 
 int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
 {
-	int		i;
+	// int		i;
+	int		status;
 	int		ret_value;
 	t_envp  envp_;
 	int		last_slash;
@@ -462,7 +478,52 @@ int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기
 	if (arg_arr[0] == 0)
 		return (0);
 	last_slash = get_last_slash_idx(arg_arr[0]);
-	
+	if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
+	{
+		int stat = file_or_directory(arg_arr[0]);
+		if (stat != 0) // 존재하지 않는 명령?파일?디렉토리면 바로 종료
+			return (stat);
+	}
+	/*
+	arg_arr[0] 을 path 환경변수 파싱한 후에 뒤에 붙여서 stat 함수로 존재여부 & 실행 가능 여부 확인해보기(루프 돌면서,,)
+	-> 존재하고 실행 가능하면 mini_echo등 작성한 함수 실행하기
+	-> 다 돌아도 없으면 strncmp함수로 나머지 명령어들(export, unset, exit, $?, cd)과 비교 -> 실행
+	-> cmp도 안되면 없는 커맨드
+	*/
+	if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
+	{
+		// free(path);
+		// path = ft_strdup(arg[0]);
+		char	*path = ft_strdup(arg_arr[0]);
+		char	**path_ = ft_split(parse_path(envp), ':');
+		int i = -1;
+		struct 	stat sb;
+		int	flag = 0;
+
+		while (path_ != 0 && path != 0 && path_[++i])
+		{
+			if (path != 0)
+				free(path);
+			path = ft_strjoin(path_[i], arg_arr[0]);
+			if (stat(path, &sb) == 0 && (sb.st_mode&S_IXUSR))
+			{
+				flag = 1;
+				break ;
+			}
+		}
+		if (flag == 1) // 실행 파일 존재
+		{
+			pid_t pid = fork();
+			wait(&status);
+			if (pid == 0)
+			{
+				if (execve(path, arg_arr, envp->envp_list) == -1)
+					return (1);
+			}
+			else 
+				return (status);
+		}
+	}
 	// if arg[0] 에 '/'가 있으면 -> 경로를 입력한 것
 	// else 명령어만 친거
 	if (ft_strncmp(arg_arr[0] + last_slash + 1, "echo", 5) == 0)
