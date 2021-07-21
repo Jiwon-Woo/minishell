@@ -85,7 +85,7 @@ char	*remove_qnote(char *cmd_line, t_envp *envp)
 					{
 						char *key = 0;
 						i++;
-						while (cmd_line[i] != '\"' && cmd_line[i] != '$' && cmd_line[i] != '?' && ft_isspace(cmd_line[i]) == 0)
+						while (cmd_line[i] != 0 && cmd_line[i] != '\"' && cmd_line[i] != '$' && cmd_line[i] != '?' && ft_isspace(cmd_line[i]) == 0)
 						{
 							key = str_append_char(key, cmd_line[i++]);
 						}
@@ -115,6 +115,35 @@ char	*remove_qnote(char *cmd_line, t_envp *envp)
 					i++;
 			}
 		}
+		else if (cmd_line[i] == '$')
+		{
+			char *key = 0;
+			i++;
+			while (cmd_line[i] != 0 && (!(cmd_line[i] == '\"' && i != quote.q_double_index)
+				&& !(cmd_line[i] == '\'' && i != quote.q_single_index))
+				&& cmd_line[i] != '$' && cmd_line[i] != '?' && ft_isspace(cmd_line[i]) == 0)
+			{
+				key = str_append_char(key, cmd_line[i++]);
+			}
+			if (key == 0 && cmd_line[i] == '$')
+			{
+				key = ft_strdup("$");
+				i++;
+			}
+			if (key == 0 && cmd_line[i] == '?')
+			{
+				ret = ft_strjoin(ret, ft_itoa(envp->last_status));
+				i++;
+			}
+			else if (key == 0)
+				ret = str_append_char(ret, '$');
+			else
+			{
+				char *value = get_value(key, envp->envp_list);
+				// char *value = getenv(key);
+				ret = ft_strjoin(ret, value);
+			}
+		}
 		else
 		{
 			if (cmd_line[i] == '\'' || cmd_line[i] == '\"')
@@ -123,6 +152,7 @@ char	*remove_qnote(char *cmd_line, t_envp *envp)
 				ret = str_append_char(ret, cmd_line[i++]);
 		}
 	}
+	// printf("ret : %s\n", ret);
 	return (ret);
 }
 

@@ -27,11 +27,11 @@ void	sigint_handler(int signo)
 	temp[end + 1] = ' ';
 	temp[end + 2] = 0;
 	// printf("temp :/ %s\n", temp);
-	rl_replace_line(temp, 0);
+	// rl_replace_line(temp, 0);
 	rl_on_new_line();
 	rl_redisplay();
 	printf("\n");
-	rl_replace_line("", 0);
+	// rl_replace_line("", 0);
 	rl_on_new_line();
 	rl_redisplay();
 }
@@ -192,7 +192,26 @@ int mini_env(char **arg, t_envp *envp)
 	return (1);
 }
 
-int mini_cd(char **arg)
+char **get_env_ptr(char *key, char **envp)
+{
+	int i;
+	int equal_idx;
+
+	i = -1;
+	// if (key[0] == '$' && key[1] == 0)
+		// return (&ft_itoa(getpid()));
+	// else if (key[0] == '?' && key[1] == 0)
+
+	while (envp[++i])
+	{
+		equal_idx = get_equal_idx(envp[i]);
+		if (ft_strlen(key) == equal_idx && ft_strncmp(envp[i], key, equal_idx) == 0)
+			return (&envp[i]);
+	}
+	return (0);
+}
+
+int mini_cd(char **arg, t_envp *envp)//envp 추가! 
 {
 	pid_t	pid;
 	int		status;
@@ -207,12 +226,20 @@ int mini_cd(char **arg)
 	// if (pid == 0)
 	// {
 	// execve("/usr/bin/cd", arg, envp);
-	return (chdir(arg[1]) == -1);
+
+	if (chdir(arg[1]) != -1)
+	{
+		char **pwd = get_env_ptr("PWD", envp->envp_list);
+		char *buf = getcwd(NULL, 0);
+		*pwd = ft_strjoin("PWD=", buf);
+		free(buf);
+		return (1);
+	}
+	return (-1);
 	// }
 	// else
 	// {
-	// 	return (status);
-	// }
+	// 	retu
 	// return (-1);
 }
 
@@ -459,10 +486,6 @@ int	file_or_directory(char *arg)
 		printf("bash: %s: is a directory\n", arg);
 		return(126);
 	}
-	else
-	{
-		printf("bash: %s: is a file\n", arg);
-	}
 	return (0);
 }
 
@@ -482,7 +505,20 @@ int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기
 	{
 		int stat = file_or_directory(arg_arr[0]);
 		if (stat != 0) // 존재하지 않는 명령?파일?디렉토리면 바로 종료
-			return (stat);
+			return (stat); // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없는 이유 출력 (경로가 있는 명령어)
+		else
+		{
+			// 실행시키고 리턴
+			pid_t pid = fork();
+			wait(&status);
+			if (pid == 0) 
+			{
+				if (execve(arg_arr[0], arg_arr, envp->envp_list) == -1)
+					return (1);
+			}
+			else
+				return (status);
+		}
 	}
 	/*
 	arg_arr[0] 을 path 환경변수 파싱한 후에 뒤에 붙여서 stat 함수로 존재여부 & 실행 가능 여부 확인해보기(루프 돌면서,,)
@@ -490,6 +526,17 @@ int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기
 	-> 다 돌아도 없으면 strncmp함수로 나머지 명령어들(export, unset, exit, $?, cd)과 비교 -> 실행
 	-> cmp도 안되면 없는 커맨드
 	*/
+
+	if (ft_strncmp(arg_arr[0] + last_slash + 1, "cd", 3) == 0)
+		return (mini_cd(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "export", 7) == 0)
+		return (mini_export(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
+		return (mini_unset(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
+		return (mini_exit());
+	if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
+		return (mini_status(arg_arr, envp));
 	if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
 	{
 		// free(path);
@@ -504,7 +551,7 @@ int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기
 		{
 			if (path != 0)
 				free(path);
-			path = ft_strjoin(path_[i], arg_arr[0]);
+			path = ft_strjoin(path_[i], ft_strjoin("/", arg_arr[0]));
 			if (stat(path, &sb) == 0 && (sb.st_mode&S_IXUSR))
 			{
 				flag = 1;
@@ -523,31 +570,32 @@ int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기
 			else 
 				return (status);
 		}
+		else // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없다고 하고 종료 (경로가 없는 명령어)
+		{
+			printf("bash: %s: command not found\n", arg_arr[0]);
+			return (127);
+		}
 	}
 	// if arg[0] 에 '/'가 있으면 -> 경로를 입력한 것
 	// else 명령어만 친거
+	
+	/*
+	// 나머지 명령어는 path 확인하면서 처리
 	if (ft_strncmp(arg_arr[0] + last_slash + 1, "echo", 5) == 0)
 		return (mini_echo(arg_arr, envp, last_slash));
-	if (ft_strncmp(arg_arr[0] + last_slash + 1, "cd", 3) == 0)
-		return (mini_cd(arg_arr));
 	if (ft_strncmp(arg_arr[0] + last_slash + 1, "pwd", 4) == 0)
 		return (mini_pwd(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0] + last_slash + 1, "env", 4) == 0)
+	if (ft_strncmp(arg_arr[0] + last_slash + 1, "env", 4) == 0) 
 		return (mini_env(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0] + last_slash + 1, "export", 7) == 0)
-		return (mini_export(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0] + last_slash + 1, "unset", 6) == 0)
-		return (mini_unset(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0] + last_slash + 1, "exit", 5) == 0)
-		return (mini_exit());
-	if (ft_strncmp(arg_arr[0] + last_slash + 1, "$?", 3) == 0)
-		return (mini_status(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0] + last_slash + 1, "ls", 3) == 0)
 		return (mini_ls(arg_arr, envp));
+
+	// 어차피 실행불가능한 파일을 위에서 걸러주이 이 예외처리 할필요 없음?
 	if (last_slash == -1)
 		printf("bash: %s: command not found\n", arg_arr[0]);
 	else
 		file_or_directory(arg_arr[0]);
+	*/
 	return (127);
 }
 
