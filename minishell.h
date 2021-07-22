@@ -55,6 +55,7 @@ int		ft_atoi(char *str, int *integer);
 
 int		get_equal_idx(char *env_line);
 char	*get_value(char *key, char **envp);
+char	*ft_strjoin_with_free(char *s1, char *s2);
 
 
 #endif

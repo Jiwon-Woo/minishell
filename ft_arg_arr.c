@@ -56,103 +56,136 @@ int	get_list_size(t_list *arg_list)
 	return (size);
 }
 
-char	*remove_qnote(char *cmd_line, t_envp *envp)
+int replace_env_value(char *key, char **ret, char *cmd_line, int i, t_envp *envp)
 {
-	int	i = 0;
+	char	*value;
+
+	if (key == 0 && cmd_line[i] == '$')
+	{
+		key = ft_strdup("$");
+		i++;
+	}
+	if (key == 0 && cmd_line[i] == '?')
+	{
+		*ret = ft_strjoin_with_free(*ret, ft_itoa(envp->last_status));
+		i++;
+	}
+	else if (key == 0)
+		*ret = str_append_char(*ret, '$');
+	else
+	{
+		value = get_value(key, envp->envp_list);
+		*ret = ft_strjoin_with_free(*ret, value);
+	}
+	if (key != 0)
+		free(key);
+	return (i);
+}
+
+int find_env_in_double_quote(char **ret, char *cmd_line, int i, t_envp *envp, t_quote quote)
+{
+	char	*key;
+	
+	key = 0;
+	i++;
+	while (cmd_line[i] != 0 && ft_isspace(cmd_line[i]) == 0
+		&& cmd_line[i] != '$' && cmd_line[i] != '?'
+		&& cmd_line[i] != '\"' && !(cmd_line[i] == '\'' && i != quote.q_single_index))
+	{
+		key = str_append_char(key, cmd_line[i++]);
+	}
+	i = replace_env_value(key, ret, cmd_line, i, envp);
+	return (i);
+}
+
+int find_env_without_quote(char **ret, char *cmd_line, int i, t_envp *envp, t_quote	quote)
+{
+	char	*key;
+
+	key = 0;
+	i++;
+	while (cmd_line[i] != 0 && (!(cmd_line[i] == '\"' && i != quote.q_double_index)
+		&& !(cmd_line[i] == '\'' && i != quote.q_single_index))
+		&& cmd_line[i] != '$' && cmd_line[i] != '?' && ft_isspace(cmd_line[i]) == 0)
+	{
+		key = str_append_char(key, cmd_line[i++]);
+	}
+	i = replace_env_value(key, ret, cmd_line, i, envp);
+	return (i);
+}
+
+int	in_single_quote(char **ret, char *cmd_line, int i)
+{
+	while (cmd_line[i] != '\'' && cmd_line[i] != 0)
+		*ret = str_append_char(*ret, cmd_line[i++]);
+	if (cmd_line[i] == '\'')
+		i++;
+	return (i);
+}
+
+void	check_single_in_double(char *line, int i, t_quote *quote)
+{
+	init_quote(quote);
+	while (line[i] != 0 && line[i] != '\"')
+	{
+		if (line[i] == '\'')
+		{
+			quote->q_single *= -1;
+			quote->q_single_index = i;
+		}
+		i++;
+	}
+	if (quote->q_single != -1)
+		quote->q_single_index = -1;
+}
+
+int in_double_quote(char **ret, char *cmd_line, int i, t_envp *envp)
+{
 	t_quote quote;
-	char	*ret = 0;
+
+	check_single_in_double(cmd_line, i, &quote);
+	while (cmd_line[i] != '\"' && cmd_line[i] != 0)
+	{
+		if (cmd_line[i] == '$')
+			i = find_env_in_double_quote(ret, cmd_line, i, envp, quote);
+		else
+			*ret = str_append_char(*ret, cmd_line[i++]);
+	}
+	if (cmd_line[i] == '\"')
+		i++;
+	return (i);
+}
+
+int without_quote(char **ret, char *cmd_line, int i)
+{
+	if (cmd_line[i] == '\'' || cmd_line[i] == '\"')
+		*ret = str_append_char(*ret, cmd_line[i++]);
+	while (cmd_line[i] != '\'' && cmd_line[i] != '\"' && cmd_line[i] != 0)
+		*ret = str_append_char(*ret, cmd_line[i++]);
+	return (i);
+}
+
+char	*remove_quote(char *cmd_line, t_envp *envp)
+{
+	int	i;
+	t_quote	quote;
+	char	*ret;
 
 	init_quote(&quote);
 	check_quote(cmd_line, &quote);
 	ret = ft_strdup("");
+	i = 0;
 	while (cmd_line[i])
 	{
-		if ((cmd_line[i] == '\"' && i != quote.q_double_index) ||
-			(cmd_line[i] == '\'' && i != quote.q_single_index))
-		{	
-			if (cmd_line[i++] == '\'')
-			{
-				while (cmd_line[i] != '\'' && cmd_line[i] != 0)
-					ret = str_append_char(ret, cmd_line[i++]);
-				if (cmd_line[i] == '\'')
-					i++;
-			}
-			else
-			{
-				while (cmd_line[i] != '\"' && cmd_line[i] != 0)
-				{
-					if (cmd_line[i] == '$')
-					{
-						char *key = 0;
-						i++;
-						while (cmd_line[i] != 0 && cmd_line[i] != '\"' && cmd_line[i] != '$' && cmd_line[i] != '?' && ft_isspace(cmd_line[i]) == 0)
-						{
-							key = str_append_char(key, cmd_line[i++]);
-						}
-						if (key == 0 && cmd_line[i] == '$')
-						{
-							key = ft_strdup("$");
-							i++;
-						}
-						if (key == 0 && cmd_line[i] == '?')
-						{
-							ret = ft_strjoin(ret, ft_itoa(envp->last_status));
-							i++;
-						}
-						else if (key == 0)
-							ret = str_append_char(ret, '$');
-						else
-						{
-							char *value = get_value(key, envp->envp_list);
-							// char *value = getenv(key);
-							ret = ft_strjoin(ret, value);
-						}
-					}
-					else
-						ret = str_append_char(ret, cmd_line[i++]);
-				}
-				if (cmd_line[i] == '\"')
-					i++;
-			}
-		}
+		if (cmd_line[i] == '\'' && i != quote.q_single_index)
+			i = in_single_quote(&ret, cmd_line, ++i);
+		else if (cmd_line[i] == '\"' && i != quote.q_double_index)
+			i = in_double_quote(&ret, cmd_line, ++i, envp);
 		else if (cmd_line[i] == '$')
-		{
-			char *key = 0;
-			i++;
-			while (cmd_line[i] != 0 && (!(cmd_line[i] == '\"' && i != quote.q_double_index)
-				&& !(cmd_line[i] == '\'' && i != quote.q_single_index))
-				&& cmd_line[i] != '$' && cmd_line[i] != '?' && ft_isspace(cmd_line[i]) == 0)
-			{
-				key = str_append_char(key, cmd_line[i++]);
-			}
-			if (key == 0 && cmd_line[i] == '$')
-			{
-				key = ft_strdup("$");
-				i++;
-			}
-			if (key == 0 && cmd_line[i] == '?')
-			{
-				ret = ft_strjoin(ret, ft_itoa(envp->last_status));
-				i++;
-			}
-			else if (key == 0)
-				ret = str_append_char(ret, '$');
-			else
-			{
-				char *value = get_value(key, envp->envp_list);
-				// char *value = getenv(key);
-				ret = ft_strjoin(ret, value);
-			}
-		}
+			i = find_env_without_quote(&ret, cmd_line, i, envp, quote);
 		else
-		{
-			if (cmd_line[i] == '\'' || cmd_line[i] == '\"')
-				ret = str_append_char(ret, cmd_line[i++]);
-			while (cmd_line[i] != '\'' && cmd_line[i] != '\"' && cmd_line[i] != 0)
-				ret = str_append_char(ret, cmd_line[i++]);
-		}
+			i = without_quote(&ret, cmd_line, i);
 	}
-	// printf("ret : %s\n", ret);
 	return (ret);
 }
 
@@ -168,13 +201,13 @@ t_list	*list_to_char_arr(t_list *arg_list, t_envp *envp)
 	first = arg_list;
 	while (arg_list)
 	{
-		// lst_size = get_list_size(arg_list);
+
 		int	sperate_num = get_list_size(arg_list);
 		arg_arr = (char **)malloc(sizeof(char *) * (sperate_num + 1));
 		idx = -1;
 		while (++idx < sperate_num)
 		{
-			arg_arr[idx] = remove_qnote((char *)arg_list->content, envp);
+			arg_arr[idx] = remove_quote((char *)arg_list->content, envp);
 			arg_list = arg_list->next;
 		}
 		arg_arr[sperate_num] = (char *)0;
