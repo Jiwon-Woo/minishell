@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstclear.c                                      :+:      :+:    :+:   */
+/*   ft_lstclear_two.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/05 12:08:01 by jwoo              #+#    #+#             */
-/*   Updated: 2021/07/23 20:21:33 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/07/23 20:23:34 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "minishell.h"
 
-void	ft_lstclear(t_list **lst, void (*del)(void *))
+void	ft_lstclear_two(t_list **lst, void (*del)(char **))
 {
 	t_list	*temp;
 

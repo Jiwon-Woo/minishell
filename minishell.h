@@ -41,8 +41,9 @@ typedef	struct s_envp
 int		factor_num(char *s);
 char	**factor_len(char **factor, char *s, int factor_num);
 void	factor_split(char **factor, char *s, int factor_num);
-char	**free_two_dimension(char **word, int num);
+void	free_two_dimension(char **word);
 char	**ft_split_space(char *s);
+void	ft_lstclear_two(t_list **lst, void (*del)(char **));
 
 char	*str_append_char(char *str, char c);
 t_list	*get_arg_list(char *line, t_quote quote);

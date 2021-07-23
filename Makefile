@@ -9,7 +9,8 @@ SOURCE = ft_split_space.c \
 		ft_atoi_ret_error.c \
 		ft_arg_arr.c \
 		env.c \
-		ft_strjoin_with_free.c
+		ft_strjoin_with_free.c \
+		ft_lstclear_two.c
 OBJECT = $(SOURCE:.c=.o)
 MAIN = minishell.c
 # MAIN = main.c

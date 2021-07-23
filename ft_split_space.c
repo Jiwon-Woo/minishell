@@ -1,18 +1,17 @@
 #include "minishell.h"
 
-char	**free_two_dimension(char **word, int num)
+void free_two_dimension(char **word)
 {
 	int	n;
 
 	n = -1;
-	while (++n <= num)
+	while (word[++n])
 	{
 		free(word[n]);
 		word[n] = 0;
 	}
 	free(word);
 	word = 0;
-	return (NULL);
 }
 
 int		factor_num(char *s)
@@ -56,7 +55,10 @@ char	**factor_len(char **factor, char *s, int factor_num)
 		{
 			factor[num] = (char *)malloc(sizeof(char) * (len + 1));
 			if (factor[num] == 0)
-				return (free_two_dimension(factor, num));
+			{
+				free_two_dimension(factor);
+				return (0);
+			}
 			num++;
 		}
 	}

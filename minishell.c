@@ -78,19 +78,65 @@ void	print_export(t_envp *envp)
 		write(1, envp->envp_list[envp->sort_idx[i]], equal_idx + 1);
 		if (equal_idx != ft_strlen(envp->envp_list[envp->sort_idx[i]]))
 			write(1, "\"", 1);
-		write(1, envp->envp_list[envp->sort_idx[i]] + equal_idx + 1, ft_strlen(envp->envp_list[envp->sort_idx[i]] + equal_idx + 1));
+		write(1, envp->envp_list[envp->sort_idx[i]] + equal_idx + 1, \
+			ft_strlen(envp->envp_list[envp->sort_idx[i]] + equal_idx + 1));
 		if (equal_idx != ft_strlen(envp->envp_list[envp->sort_idx[i]]))
 			write(1, "\"", 1);
 		write(1, "\n", 1);
 	}
 }
 
+void with_eq(char **arg_arr, t_envp *envp, int i)
+{
+	int j;
+	int key_last;
+	int input_key_last;
+
+	input_key_last = get_equal_idx(arg_arr[i]);
+	j = -1;
+	while (envp->envp_list[++j])
+	{
+		key_last = get_equal_idx(envp->envp_list[j]);
+		if (key_last < 0)
+			key_last = ft_strlen(envp->envp_list[j]);
+		if (key_last == input_key_last && ft_strncmp(envp->envp_list[j], \
+			arg_arr[i], key_last) == 0) // 같은거 있기만 하면 교체
+		{
+			envp_substitute(envp, arg_arr[i], j);
+			break ;
+		}
+	}
+	if (envp->envp_list[j] == 0)
+		envp_add(envp, arg_arr[i]);
+}
+
+void	without_eq(char **arg_arr, t_envp *envp, int i)
+{
+	int j;
+	int key_last;
+	int input_key_last;
+
+	input_key_last = ft_strlen(arg_arr[i]);
+	j = -1;
+	while (envp->envp_list[++j])
+	{
+		key_last = get_equal_idx(envp->envp_list[j]);
+		if (key_last < 0)
+			key_last = ft_strlen(envp->envp_list[j]);
+		if (key_last == input_key_last && \
+			ft_strncmp(envp->envp_list[j], arg_arr[i], key_last) == 0)
+			break ;
+	}
+	if (envp->envp_list[j] == 0)
+		envp_add(envp, arg_arr[i]);
+}
+
 int		mini_export(char **arg_arr, t_envp *envp)
 {
 	int	i;
-	int	j;
-	int	key_last;
-	int	input_key_last;
+	// int	j;
+	// int	key_last;
+	// int	input_key_last;
 
 	i = 1;
 	if (get_arg_size(arg_arr) == 1) // print
@@ -102,43 +148,40 @@ int		mini_export(char **arg_arr, t_envp *envp)
 	{
 		if (get_equal_idx(arg_arr[i]) > 0) // = 이 있는 인자가 들어옴
 		{
-			input_key_last = get_equal_idx(arg_arr[i]);
-			j = -1;
-			while (envp->envp_list[++j])
-			{
-				key_last = get_equal_idx(envp->envp_list[j]);
-				if (key_last < 0)
-					key_last = ft_strlen(envp->envp_list[j]);
-				if (key_last == input_key_last && ft_strncmp(envp->envp_list[j], arg_arr[i], key_last) == 0) // 같은거 있기만 하면 교체
-				{
-					envp_substitute(envp, arg_arr[i], j);
-					break ;
-				}
-			}
-			if (envp->envp_list[j] == 0)
-			{
-				envp_add(envp, arg_arr[i]);
-			}
+			with_eq(arg_arr, envp, i);
+			// input_key_last = get_equal_idx(arg_arr[i]);
+			// j = -1;
+			// while (envp->envp_list[++j])
+			// {
+			// 	key_last = get_equal_idx(envp->envp_list[j]);
+			// 	if (key_last < 0)
+			// 		key_last = ft_strlen(envp->envp_list[j]);
+			// 	if (key_last == input_key_last && ft_strncmp(envp->envp_list[j], \
+			// 		arg_arr[i], key_last) == 0) // 같은거 있기만 하면 교체
+			// 	{
+			// 		envp_substitute(envp, arg_arr[i], j);
+			// 		break ;
+			// 	}
+			// }
+			// if (envp->envp_list[j] == 0)
+			// 	envp_add(envp, arg_arr[i]);
 		}
 		else // = 없는 인자가 들어옴
 		{
-			input_key_last = ft_strlen(arg_arr[i]);
-			j = -1;
-			while (envp->envp_list[++j])
-			{
-				key_last = get_equal_idx(envp->envp_list[j]);
-				if (key_last < 0)
-					key_last = ft_strlen(envp->envp_list[j]);
-				if (key_last == input_key_last && ft_strncmp(envp->envp_list[j], arg_arr[i], key_last) == 0)
-				{
-					// 밑 112번째 줄 조건에 안들어가도록..
-					break ;
-				}
-			}
-			if (envp->envp_list[j] == 0)
-			{
-				envp_add(envp, arg_arr[i]);
-			}
+			without_eq(arg_arr, envp, i);
+			// input_key_last = ft_strlen(arg_arr[i]);
+			// j = -1;
+			// while (envp->envp_list[++j])
+			// {
+			// 	key_last = get_equal_idx(envp->envp_list[j]);
+			// 	if (key_last < 0)
+			// 		key_last = ft_strlen(envp->envp_list[j]);
+			// 	if (key_last == input_key_last && \
+			// 		ft_strncmp(envp->envp_list[j], arg_arr[i], key_last) == 0)
+			// 		break ;
+			// }
+			// if (envp->envp_list[j] == 0)
+			// 	envp_add(envp, arg_arr[i]);
 		}
 		i++;
 	}
@@ -149,19 +192,14 @@ int		mini_export(char **arg_arr, t_envp *envp)
 int mini_pwd(char **arg, t_envp *envp)
 {
 	pid_t	pid;
-	char	*arg_temp[] = {"pwd", (char *)0};
 	int		status;
 
 	pid = fork();
 	wait(&status);
 	if (pid == 0)
-	{
-		execve("/bin/pwd", arg_temp, envp->envp_list);
-	}
+		execve("/bin/pwd", arg, envp->envp_list);
 	else
-	{
 		return (status);
-	}
 	return (1);
 }
 
@@ -173,13 +211,9 @@ int mini_env(char **arg, t_envp *envp)
 	pid = fork();
 	wait(&status);
 	if (pid == 0)
-	{
 		execve("/usr/bin/env", arg, envp->envp_list);
-	}
 	else
-	{
 		return (status);
-	}
 	return (1);
 }
 
@@ -208,6 +242,7 @@ int mini_cd(char **arg, t_envp *envp) //envp 추가!
 	{
 		char **pwd = get_env_ptr("PWD", envp->envp_list);
 		char *buf = getcwd(NULL, 0);
+		free(*pwd);
 		*pwd = ft_strjoin("PWD=", buf);
 		free(buf);
 		return (1);
@@ -241,57 +276,6 @@ char *parse_path(t_envp *envp)//path 환경변수 받아오기
 	return (ft_strdup(envp->envp_list[flag] + 5));
 }
 
-int mini_echo(char **arg, t_envp *envp, int last_slash)
-{
-	pid_t	pid;
-	int		status;
-	char	*path = ft_strdup(arg[0]);
-	struct 	stat sb;
-	int		i;
-	char 	**path_ = 0;
-
-	if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
-	{
-		path_ = ft_split(parse_path(envp), ':');
-		i = -1;
-		while(path_ != 0 && path != 0 && path_[++i])
-		{
-			if (path != 0)
-				free(path);
-			path = ft_strjoin(path_[i], "/echo");
-			if (stat(path, &sb) == 0)
-				break ;
-		}
-		if (path_ == 0 || path_[i] == 0)
-		{
-			if (path != 0)
-				free(path);
-			path = 0;
-		}
-	}
-	if (path == 0 || stat(path, &sb) == -1)
-		return (file_or_directory(path));
-	pid = fork();
-	wait(&status);
-	if (pid == 0) 
-	{
-		if (execve(path, arg, envp->envp_list) == -1)
-			return (1);
-	}
-	else
-	{
-		if(WIFEXITED(status))
-			printf("Normal exit: exit(%d)\n", WEXITSTATUS(status));
-		else if(WIFSIGNALED(status))
-			printf("Incorrect exit: signo(%d) %s\n", WTERMSIG(status), WCOREDUMP(status)?"(core dumped)":"");
-		free(path);
-		printf("%s\n", strerror(errno));
-		printf("status____ : %d\n", status >> 8);
-		return (status);
-	}
-	return (1);
-}
-
 int mini_ls(char **arg, t_envp *envp)
 {
 	pid_t	pid;
@@ -300,13 +284,9 @@ int mini_ls(char **arg, t_envp *envp)
 	pid = fork();
 	wait(&status);
 	if (pid == 0)
-	{
 		execve("/bin/ls", arg, envp->envp_list);
-	}
 	else
-	{
 		return (status);
-	}
 	return (1);
 }
 
@@ -344,8 +324,12 @@ int mini_unset(char **arg, t_envp *envp)
 			j = -1;
 			int	idx = 0;
 			while (++j < get_arg_size(envp->envp_list))
+			{
 				if (j != flag)
 					temp[idx++] = envp->envp_list[j];
+				else
+					free(envp->envp_list[j]);
+			}
 			temp[idx] = 0;
 			if (envp->envp_list != 0)
 				free(envp->envp_list);
@@ -373,7 +357,6 @@ int	get_last_slash_idx(char *arg)
 {
 	int	last;
 	int i;
-
 	last = -1;
 	i = -1;
 	while (arg[++i])
@@ -387,16 +370,13 @@ int	get_last_slash_idx(char *arg)
 int get_file_type(char *path)
 {
 	struct	stat sb;
-	// path = ft_strjoin(path, slash[i]);
-	// printf("%d\n", stat(path, &sb));
+
 	if (stat(path, &sb) == -1)
 		return (-1);
 	else if ((S_IFMT & sb.st_mode) == S_IFDIR)
 		return (1); // dir
 	else
 		return (0); // file
-	// path = ft_strjoin(path, "/");
-	// printf("%d\n", stat(path, &sb));
 }
 
 int	file_or_directory(char *arg)
@@ -443,43 +423,105 @@ int	file_or_directory(char *arg)
 	return (0);
 }
 
+int with_path(char **arg_arr, t_envp *envp)
+{
+	int status;
+	int stat;
+	pid_t pid;
+
+	stat = file_or_directory(arg_arr[0]);
+	if (stat != 0) // 존재하지 않는 명령?파일?디렉토리면 바로 종료
+		return (stat); // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없는 이유 출력 (경로가 있는 명령어)
+	else
+	{
+		pid = fork();
+		wait(&status);
+		if (pid == 0) 
+			if (execve(arg_arr[0], arg_arr, envp->envp_list) == -1)
+				return (1);
+	}
+	return (status);
+}
+
+int exec_file(char *path, char **arg_arr, t_envp *envp)
+{
+	pid_t pid;
+	int status;
+
+	pid = fork();
+	wait(&status);
+	if (pid == 0)
+	{
+		if (execve(path, arg_arr, envp->envp_list) == -1)
+		{
+			if (path != 0)
+			{
+				free(path);
+				path = 0;
+			}
+			return (1);
+		}
+	}
+	if (path != 0)
+	{
+		free(path);
+		path = 0;
+	}
+	return (status);
+}
+
+int without_path(char **arg_arr, t_envp *envp)
+{
+	char	*path = ft_strdup(arg_arr[0]);
+	char	*parsepath = parse_path(envp);
+	char	**env_path = ft_split(parsepath, ':');
+	int 	i = -1;
+	struct 	stat sb;
+	char *temp;
+	
+	while (env_path != 0 && arg_arr[0] != 0 && env_path[++i])
+	{
+		if (path != 0)
+			free(path);
+		temp = ft_strjoin("/", arg_arr[0]);
+		path = ft_strjoin(env_path[i], temp);
+		free(temp);
+		temp = 0;
+		if (stat(path, &sb) == 0 && (sb.st_mode&S_IXUSR))
+			break ;
+	}
+	free_two_dimension(env_path);
+	if (parsepath != 0)
+	{
+		free(parsepath);
+		parsepath = 0;
+	}
+	if (stat(path, &sb) == 0 && (sb.st_mode&S_IXUSR)) // 실행 파일 존재
+		return (exec_file(path, arg_arr, envp));
+	else // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없다고 하고 종료 (경로가 없는 명령어)
+	{
+		if (path != 0)
+		{
+			free(path);
+			path = 0;
+		}
+		printf("bash: %s: command not found\n", arg_arr[0]);
+		return (127);
+	}
+}
+
 int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
 {
 	int		status;
-	int		ret_value;
 	t_envp  envp_;
 	int		last_slash;
 
-	last_slash = 0;
 	if (arg_arr[0] == 0)
 		return (0);
 	last_slash = get_last_slash_idx(arg_arr[0]);
 	if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
-	{
-		int stat = file_or_directory(arg_arr[0]);
-		if (stat != 0) // 존재하지 않는 명령?파일?디렉토리면 바로 종료
-			return (stat); // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없는 이유 출력 (경로가 있는 명령어)
-		else
-		{
-			// 실행시키고 리턴
-			pid_t pid = fork();
-			wait(&status);
-			if (pid == 0) 
-			{
-				if (execve(arg_arr[0], arg_arr, envp->envp_list) == -1)
-					return (1);
-			}
-			else
-				return (status);
-		}
-	}
-	/*
-	arg_arr[0] 을 path 환경변수 파싱한 후에 뒤에 붙여서 stat 함수로 존재여부 & 실행 가능 여부 확인해보기(루프 돌면서,,)
-	-> 존재하고 실행 가능하면 mini_echo등 작성한 함수 실행하기
-	-> 다 돌아도 없으면 strncmp함수로 나머지 명령어들(export, unset, exit, $?, cd)과 비교 -> 실행
-	-> cmp도 안되면 없는 커맨드
-	*/
-	if (ft_strncmp(arg_arr[0] + last_slash + 1, "cd", 3) == 0)
+		return (with_path(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
 		return (mini_cd(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0], "export", 7) == 0)
 		return (mini_export(arg_arr, envp));
@@ -490,40 +532,7 @@ int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기
 	if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
 		return (mini_status(arg_arr, envp));
 	if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
-	{
-		char	*path = ft_strdup(arg_arr[0]);
-		char	**path_ = ft_split(parse_path(envp), ':');
-		int i = -1;
-		struct 	stat sb;
-		int	flag = 0;
-
-		while (path_ != 0 && path != 0 && path_[++i])
-		{
-			if (path != 0)
-				free(path);
-			path = ft_strjoin(path_[i], ft_strjoin("/", arg_arr[0]));
-			if (stat(path, &sb) == 0 && (sb.st_mode&S_IXUSR))
-			{
-				flag = 1;
-				break ;
-			}
-		}
-		if (flag == 1) // 실행 파일 존재
-		{
-			pid_t pid = fork();
-			wait(&status);
-			if (pid == 0)
-				if (execve(path, arg_arr, envp->envp_list) == -1)
-					return (1);
-			else 
-				return (status);
-		}
-		else // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없다고 하고 종료 (경로가 없는 명령어)
-		{
-			printf("bash: %s: command not found\n", arg_arr[0]);
-			return (127);
-		}
-	}
+		return (without_path(arg_arr, envp));
 	return (127);
 }
 
@@ -551,38 +560,39 @@ void	check_quote(char *line, t_quote *quote)
 		quote->q_double_index = -1;
 }
 
-int valid_quote(char *arg, char *line, t_quote *quote, int *i)
+int valid_quote(char **arg, char *line, t_quote *quote, int *i)
 {
 	if ((line[*i] == '\"' && *i != quote->q_double_index) ||
 		(line[*i] == '\'' && *i != quote->q_single_index))
 	{
 		if (line[*i] == '\'')
 		{
-			arg = str_append_char(arg, line[(*i)++]);
+			*arg = str_append_char(*arg, line[(*i)++]);
 			while (line[*i] != '\'' && line[*i] != 0)
-				arg = str_append_char(arg, line[(*i)++]);
+				*arg = str_append_char(*arg, line[(*i)++]);
 			if (line[*i] != 0)
-				arg = str_append_char(arg, line[(*i)++]);
+				*arg = str_append_char(*arg, line[(*i)++]);
 		}
 		else
 		{
-			arg = str_append_char(arg, line[(*i)++]);
+			*arg = str_append_char(*arg, line[(*i)++]);
 			while (line[*i] != '\"' && line[*i] != 0)
-				arg = str_append_char(arg, line[(*i)++]);
+				*arg = str_append_char(*arg, line[(*i)++]);
 			if (line[*i] != 0)
-				arg = str_append_char(arg, line[(*i)++]);
+				*arg = str_append_char(*arg, line[(*i)++]);
 		}
 		return (1);
 	}
 	return (0);
 }
-void invalid_quote(char *arg, char *line, t_quote *quote, int *i)
+
+void invalid_quote(char **arg, char *line, t_quote *quote, int *i)
 {
 	if (line[*i] == '\'' || line[*i] == '\"')
-		arg = str_append_char(arg, line[(*i)++]);
+		*arg = str_append_char(*arg, line[(*i)++]);
 	while (ft_isspace(line[*i]) == 0 && line[*i] != 0 \
 		&& line[*i] != '\'' && line[*i] != '\"')
-		arg = str_append_char(arg, line[(*i)++]);
+		*arg = str_append_char(*arg, line[(*i)++]);
 }
 
 t_list	*get_arg_list(char *line, t_quote quote)
@@ -600,37 +610,8 @@ t_list	*get_arg_list(char *line, t_quote quote)
 			i++;
 		while (line[i])
 		{
-			//////여기에if(조건)
-			if ((line[i] == '\"' && i != quote.q_double_index) ||
-				(line[i] == '\'' && i != quote.q_single_index))
-			{
-				if (line[i] == '\'')
-				{
-					arg = str_append_char(arg, line[i++]);
-					while (line[i] != '\'' && line[i] != 0)
-						arg = str_append_char(arg, line[i++]);
-					if (line[i] != 0)
-						arg = str_append_char(arg, line[i++]);
-				}
-				else
-				{
-					arg = str_append_char(arg, line[i++]);
-					while (line[i] != '\"' && line[i] != 0)
-						arg = str_append_char(arg, line[i++]);
-					if (line[i] != 0)
-						arg = str_append_char(arg, line[i++]);
-				}
-			}
-			// if (valid_quote(arg, line, &quote, &i) == 0)
-			else
-			{
-				// invalid_quote(arg, line, &quote, &i);
-				if (line[i] == '\'' || line[i] == '\"')
-					arg = str_append_char(arg, line[i++]);
-				while (ft_isspace(line[i]) == 0 && line[i] != 0 \
-					&& line[i] != '\'' && line[i] != '\"')
-					arg = str_append_char(arg, line[i++]);
-			}
+			if (valid_quote(&arg, line, &quote, &i) == 0)
+				invalid_quote(&arg, line, &quote, &i);
 			if (ft_isspace(line[i]) == 1 || line[i] == 0)
 				break ;
 		}
@@ -722,7 +703,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 
 	add_history(line_prompt[0]);
 	check_quote(line_prompt[0], quote);
-	arg_cmd_tmp[0] = get_arg_list(line_prompt[0], *quote);
+	arg_cmd_tmp[0] = get_arg_list(line_prompt[0], *quote);//t_list **arg_cmd_tmp
 	arg_cmd_tmp[1] = list_to_char_arr(arg_cmd_tmp[0], envp);
 	arg_cmd_tmp[2] = arg_cmd_tmp[1];
 	while (arg_cmd_tmp[1])
@@ -730,18 +711,22 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 		arg_arr = (char **)arg_cmd_tmp[1]->content;
 		envp->last_status = interpret(arg_arr, envp);
 		arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
+		// free_two_dimension(arg_arr);
 	}
 	arg_cmd_tmp[1] = arg_cmd_tmp[2];
 	free(line_prompt[0]);
 	free(line_prompt[1]);
 	line_prompt[1] = make_prompt();
 	line_prompt[0] = readline(line_prompt[1]);
+	ft_lstclear(&arg_cmd_tmp[0], free);
+	ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
+	// free(arg_cmd_tmp[0]);
+	// free(arg_cmd_tmp[1]);
 }
 
 int	main(int argc, char **argv, char **first_envp)
 {
 	t_list		**arg_cmd_tmp;
-	char		**arg_arr;
 	char		**line_prompt;
 	t_quote		quote;
 	t_envp		envp;
