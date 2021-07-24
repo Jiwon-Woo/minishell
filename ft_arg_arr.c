@@ -204,6 +204,25 @@ char	*remove_quote(char *cmd_line, t_envp *envp)
 	return (ret);
 }
 
+// char	*flagnum_to_sperate(int flag)
+// {
+// 	if (flag == 1)
+// 		return (ft_strdup("|"));
+// 	if (flag == 2)
+// 		return (ft_strdup(">"));
+// 	if (flag == 3)
+// 		return (ft_strdup("<"));
+// 	if (flag == 4)
+// 		return (ft_strdup(">>"));
+// 	if (flag == 5)
+// 		return (ft_strdup("<<"));
+// 	if (flag == 6)
+// 		return (ft_strdup("&&"));
+// 	if (flag == 6)
+// 		return (ft_strdup("||"));
+// 	return (0);
+// }
+
 void	add_one_line_of_cmd(t_list **arg_list, t_envp *envp, t_list **cmd_list)
 {
 	int	sperate_num;
@@ -212,8 +231,8 @@ void	add_one_line_of_cmd(t_list **arg_list, t_envp *envp, t_list **cmd_list)
 	t_list *temp;
 
 	sperate_num = get_list_size(*arg_list);
-	arg_arr = (char **)malloc(sizeof(char *) * (sperate_num + 1));
 	idx = -1;
+	arg_arr = (char **)malloc(sizeof(char *) * (sperate_num + 1));
 	while (++idx < sperate_num)
 	{
 		arg_arr[idx] = remove_quote((char *)(*arg_list)->content, envp);
@@ -221,10 +240,14 @@ void	add_one_line_of_cmd(t_list **arg_list, t_envp *envp, t_list **cmd_list)
 	}
 	arg_arr[sperate_num] = (char *)0;
 	temp = ft_lstnew(arg_arr);
+	if (temp != 0 && ft_lstlast(*cmd_list) != 0)
+		temp->pre_flag = ft_lstlast(*cmd_list)->next_flag;
+	else if (temp != 0)
+		temp->pre_flag = 0;
 	ft_lstadd_back(cmd_list, temp);
 	if ((*arg_list) != NULL)
 	{
-		temp->pipe_redirect = is_separate((char *)(*arg_list)->content);
+		temp->next_flag = is_separate((char *)(*arg_list)->content);
 		(*arg_list) = (*arg_list)->next;
 	}
 }

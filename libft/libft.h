@@ -7,7 +7,8 @@
 typedef struct	s_list
 {
 	void			*content;
-	int				pipe_redirect;
+	int				next_flag;
+	int				pre_flag;
 	struct s_list	*next;
 }				t_list;
 

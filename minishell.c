@@ -1,4 +1,5 @@
 #include "minishell.h"
+int fds[2];
 
 // 파이프 및 리다이렉션, $? 처리, 보너스?? (&& 및 ||, *), string not in pwd ?, arg 갯수 - 에러?,
 
@@ -25,11 +26,11 @@ void	sigint_handler(int signo)
 	temp[end] = ' ';
 	temp[end + 1] = ' ';
 	temp[end + 2] = 0;
-	// rl_replace_line(temp, 0);
+	rl_replace_line(temp, 0);
 	rl_on_new_line();
 	rl_redisplay();
 	printf("\n");
-	// rl_replace_line("", 0);
+	rl_replace_line("", 0);
 	rl_on_new_line();
 	rl_redisplay();
 }
@@ -142,7 +143,7 @@ int		mini_export(char **arg_arr, t_envp *envp)
 	if (get_arg_size(arg_arr) == 1) // print
 	{
 		print_export(envp);
-		return (0);
+		exit (0);
 	}
 	while (arg_arr[i])
 	{
@@ -186,7 +187,7 @@ int		mini_export(char **arg_arr, t_envp *envp)
 		i++;
 	}
 	sort_envp_idx(envp);
-	return (0);
+	exit (0);
 }
 
 int mini_pwd(char **arg, t_envp *envp)
@@ -245,9 +246,9 @@ int mini_cd(char **arg, t_envp *envp) //envp 추가!
 		free(*pwd);
 		*pwd = ft_strjoin("PWD=", buf);
 		free(buf);
-		return (1);
+		exit (1);
 	}
-	return (-1);
+	exit (-1);
 }
 
 int mini_exit()
@@ -284,7 +285,7 @@ int mini_ls(char **arg, t_envp *envp)
 	pid = fork();
 	wait(&status);
 	if (pid == 0)
-		execve("/bin/ls", arg, envp->envp_list);
+		execve("ls", arg, envp->envp_list);
 	else
 		return (status);
 	return (1);
@@ -299,7 +300,7 @@ int mini_unset(char **arg, t_envp *envp)
 
 	size = get_arg_size(arg);
 	if (size == 1)
-		return (1);
+		exit (1);
 	i = 0;
 	while (++i < size)
 	{
@@ -337,7 +338,7 @@ int mini_unset(char **arg, t_envp *envp)
 		}
 	}
 	sort_envp_idx(envp);
-	return (0);
+	exit (0);
 }
 
 int mini_status(char **arg_arr, t_envp *envp)
@@ -350,7 +351,7 @@ int mini_status(char **arg_arr, t_envp *envp)
 	write(1, status, ft_strlen(status));
 	free(status);
 	write(1, ": command not found\n", ft_strlen(": command not found\n"));
-	return (127);
+	exit (127);
 }
 
 int	get_last_slash_idx(char *arg)
@@ -423,6 +424,78 @@ int	file_or_directory(char *arg)
 	return (0);
 }
 
+// int with_path(char **arg_arr, t_envp *envp)
+// {
+// 	int status;
+// 	int stat;
+// 	pid_t pid;
+
+// 	stat = file_or_directory(arg_arr[0]);
+// 	if (stat != 0) // 존재하지 않는 명령?파일?디렉토리면 바로 종료
+// 		exit (stat); // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없는 이유 출력 (경로가 있는 명령어)
+// 	else
+// 	{
+// 		pid = fork();
+// 		wait(&status);
+// 		if (pid == 0) 
+// 			if (execve(arg_arr[0], arg_arr, envp->envp_list) == -1)
+// 				return (1);
+// 	}
+// 	return (status);
+// }
+
+// int with_path(char **arg_arr, t_envp *envp)
+// {
+// 	int status;
+// 	int stat;
+// 	pid_t pid;
+
+// 	stat = file_or_directory(arg_arr[0]);
+// 	if (stat != 0) // 존재하지 않는 명령?파일?디렉토리면 바로 종료
+// 		exit (stat); // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없는 이유 출력 (경로가 있는 명령어)
+// 	else
+// 	{
+// 		pid = fork();
+// 		wait(&status);
+// 		if (pid == 0) 
+// 			if (execve(arg_arr[0], arg_arr, envp->envp_list) == -1)
+// 				exit (1);
+// 	}
+// 	exit (status);
+// }
+
+// int exec_file(char *path, char **arg_arr, t_envp *envp)
+// {
+// 	pid_t pid;
+// 	int status;
+
+// 	pid = fork();
+// 	wait(&status);
+// 	if (pid == 0)
+// 	{
+// 		if (execve(path, arg_arr, envp->envp_list) == -1)
+// 		{
+// 			if (path != 0)
+// 			{
+// 				free(path);
+// 				path = 0;
+// 			}
+// 			return (1);
+// 		}
+// 		// char *temp[] = {"pwd", (char*)0};
+// 		// if (execve("pwd", temp, envp->envp_list) == -1)
+// 		// {
+// 		// 	return (1);
+// 		// }
+// 	}
+// 	if (path != 0)
+// 	{
+// 		free(path);
+// 		path = 0;
+// 	}
+// 	return (status);
+// }
+
 int with_path(char **arg_arr, t_envp *envp)
 {
 	int status;
@@ -431,25 +504,25 @@ int with_path(char **arg_arr, t_envp *envp)
 
 	stat = file_or_directory(arg_arr[0]);
 	if (stat != 0) // 존재하지 않는 명령?파일?디렉토리면 바로 종료
-		return (stat); // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없는 이유 출력 (경로가 있는 명령어)
+		exit (stat); // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없는 이유 출력 (경로가 있는 명령어)
 	else
 	{
 		pid = fork();
 		wait(&status);
 		if (pid == 0) 
 			if (execve(arg_arr[0], arg_arr, envp->envp_list) == -1)
-				return (1);
+				exit (1);
 	}
-	return (status);
+	exit (status);
 }
 
 int exec_file(char *path, char **arg_arr, t_envp *envp)
 {
-	pid_t pid;
 	int status;
 
-	pid = fork();
-	wait(&status);
+	pid_t pid = fork();
+	if (pid)
+		wait(&status);
 	if (pid == 0)
 	{
 		if (execve(path, arg_arr, envp->envp_list) == -1)
@@ -459,15 +532,20 @@ int exec_file(char *path, char **arg_arr, t_envp *envp)
 				free(path);
 				path = 0;
 			}
-			return (1);
 		}
+		exit (1);
 	}
+		// char *temp[] = {"pwd", (char*)0};
+		// if (execve("pwd", temp, envp->envp_list) == -1)
+		// {
+		// 	return (1);
+		// }
 	if (path != 0)
 	{
 		free(path);
 		path = 0;
 	}
-	return (status);
+	exit (status);
 }
 
 int without_path(char **arg_arr, t_envp *envp)
@@ -497,7 +575,7 @@ int without_path(char **arg_arr, t_envp *envp)
 		parsepath = 0;
 	}
 	if (stat(path, &sb) == 0 && (sb.st_mode&S_IXUSR)) // 실행 파일 존재
-		return (exec_file(path, arg_arr, envp));
+		exec_file(path, arg_arr, envp);
 	else // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없다고 하고 종료 (경로가 없는 명령어)
 	{
 		if (path != 0)
@@ -506,35 +584,107 @@ int without_path(char **arg_arr, t_envp *envp)
 			path = 0;
 		}
 		printf("bash: %s: command not found\n", arg_arr[0]);
-		return (127);
+		exit (127);
 	}
+	return(0);
 }
 
-int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
+// int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
+// {
+// 	int		status;
+// 	t_envp  envp_;
+// 	int		last_slash;
+
+// 	if (arg_arr[0] == 0)
+// 		return (0);
+// 	last_slash = get_last_slash_idx(arg_arr[0]);
+// 	// if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
+// 	// 	return (with_path(arg_arr, envp));
+// 	pid_t pid = fork();
+// 		wait(&status);
+// 	if (pid == 0)
+// 	{
+		
+// 	}
+// 	if (last_slash != -1)
+// 		with_path(arg_arr, envp);
+// 	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
+// 		return (mini_cd(arg_arr, envp));
+// 	if (ft_strncmp(arg_arr[0], "export", 7) == 0)
+// 		return (mini_export(arg_arr, envp));
+// 	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
+// 		return (mini_unset(arg_arr, envp));
+// 	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
+// 		return (mini_exit());
+// 	if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
+// 		return (mini_status(arg_arr, envp));
+// 	if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
+// 		return (without_path(arg_arr, envp));
+// 	return (127);
+// }
+
+
+int interpret(t_list *cmd_list, t_envp *envp) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
 {
 	int		status;
 	t_envp  envp_;
 	int		last_slash;
+	int		fds1[2];
+	int		fds2[2];
 
-	if (arg_arr[0] == 0)
+	printf("call interpret on %s, pre -> %d next -> %d \n",((char **)(cmd_list->content))[0], cmd_list->pre_flag, cmd_list->next_flag);
+	if (((char **)(cmd_list->content))[0] == 0)
 		return (0);
-	last_slash = get_last_slash_idx(arg_arr[0]);
-	if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
-		return (with_path(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
-		return (mini_cd(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0], "export", 7) == 0)
-		return (mini_export(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
-		return (mini_unset(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
-		return (mini_exit());
-	if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
-		return (mini_status(arg_arr, envp));
-	if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
-		return (without_path(arg_arr, envp));
+	last_slash = get_last_slash_idx(((char **)(cmd_list->content))[0]);
+	if (ft_strncmp(((char **)(cmd_list->content))[0], "exit", 5) == 0)
+		mini_exit();
+	// fprintf(fds[1], "0");
+	pid_t pid = fork();
+	if (pid == 0)
+	{
+		if (cmd_list->pre_flag == PIPE || cmd_list->next_flag == PIPE)
+		{
+			pipe(fds1);
+			pipe(fds2);
+			// fprintf(stderr, "fds1 = %d %d  fds2 = %d %d \n", fds1[0], fds1[1], fds2[0], fds2[1]);
+			if (cmd_list->pre_flag == PIPE)
+			{
+				close(fds1[1]);
+				dup2(fds1[0], 0); // 0 -> STDIN 대신에 파이프로 오는 입력을 받아라 , 1-> STDOUT-> 파이프에다 출력해라/쓰기채널 = fd[1] 읽기채널 = fd[0]
+				close(fds1[0]);
+			}
+			if (cmd_list->next_flag == PIPE)
+			{
+				close(fds1[0]);
+				dup2(fds1[1], 1); // 0 -> STDIN 대신에 파이프로 오는 입력을 받아라 , 1-> STDOUT-> 파이프에다 출력해라/쓰기채널 = fd[1] 읽기채널 = fd[0]
+				// close(fds1[1]);
+			}
+		}
+		if (last_slash != -1)
+			with_path(((char **)(cmd_list->content)), envp);
+		if (ft_strncmp(((char **)(cmd_list->content))[0], "cd", 3) == 0)
+			mini_cd(((char **)(cmd_list->content)), envp);
+		if (ft_strncmp(((char **)(cmd_list->content))[0], "export", 7) == 0)
+			mini_export(((char **)(cmd_list->content)), envp);
+		if (ft_strncmp(((char **)(cmd_list->content))[0], "unset", 6) == 0)
+			mini_unset(((char **)(cmd_list->content)), envp);
+		// if (ft_strncmp(((char **)(cmd_list->content))[0], "exit", 5) == 0)
+		// 	mini_exit();
+		if (ft_strncmp(((char **)(cmd_list->content))[0], "$?", 3) == 0)
+			mini_status(((char **)(cmd_list->content)), envp);
+		if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
+			without_path(((char **)(cmd_list->content)), envp);
+	}
+	// if (cmd_list->pre_flag == PIPE)
+	// {
+	// 	close(4);
+	// 	dup2(3, 0); // 0 -> STDIN 대신에 파이프로 오는 입력을 받아라 , 1-> STDOUT-> 파이프에다 출력해라/쓰기채널 = fd[1] 읽기채널 = fd[0]
+	// 	close(3);
+	// }
+	wait(&status);
 	return (127);
 }
+
 
 void	check_quote(char *line, t_quote *quote)
 {
@@ -709,9 +859,8 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 	while (arg_cmd_tmp[1])
 	{
 		arg_arr = (char **)arg_cmd_tmp[1]->content;
-		envp->last_status = interpret(arg_arr, envp);
+		envp->last_status = interpret(arg_cmd_tmp[1], envp);
 		arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
-		// free_two_dimension(arg_arr);
 	}
 	arg_cmd_tmp[1] = arg_cmd_tmp[2];
 	free(line_prompt[0]);
@@ -730,6 +879,8 @@ int	main(int argc, char **argv, char **first_envp)
 	char		**line_prompt;
 	t_quote		quote;
 	t_envp		envp;
+	// int fds[2];
+	// pipe(fds);
 
 	init_quote(&quote);
 	init_envp(&envp, first_envp);

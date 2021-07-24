@@ -15,7 +15,7 @@ OBJECT = $(SOURCE:.c=.o)
 MAIN = minishell.c
 # MAIN = main.c
 
-TEMP = -L/usr/local/opt/ruby/lib -I/usr/local/opt/ruby/include
+LOCAL = -I/usr/local/opt/readline/include -L/usr/local/opt/readline/lib -lreadline
 
 all : $(NAME)
 
@@ -23,8 +23,8 @@ libft :
 	@make -C ./libft all
 
 $(NAME): $(LIB) $(MAIN) libft
-	gcc $(MAIN) -g $(LIBMINISHELL) $(LIBFT) $(LIBREADLINE) -o $(NAME)
-#	gcc $(MAIN) $(LIBMINISHELL) $(LIBFT) -L/usr/include -lreadline $(TEMP) -o $(NAME)
+#	gcc $(MAIN) $(LIBMINISHELL) $(LIBFT) $(LIBREADLINE) -o $(NAME)
+	gcc $(MAIN) $(LIBMINISHELL) $(LIBFT) $(LOCAL) -o $(NAME)
 $(LIB): $(OBJECT)
 	@ar rcs $(LIB) $(OBJECT)
 $(OBJECT): $(SOURCE)
