@@ -16,10 +16,10 @@
 
 # define NONE 0
 # define PIPE 1
-# define REDIRECT1 2
-# define REDIRECT2 3
-# define REDIRECT3 4
-# define REDIRECT4 5
+# define REDIRECT1 2 // <
+# define REDIRECT2 3 // >
+# define REDIRECT3 4 // <<
+# define REDIRECT4 5 // >>
 # define AND 6
 # define OR 7
 
