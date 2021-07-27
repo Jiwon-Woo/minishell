@@ -240,20 +240,14 @@ void	add_one_line_of_cmd(t_list **arg_list, t_envp *envp, t_list **cmd_list)
 	}
 	arg_arr[sperate_num] = (char *)0;
 	temp = ft_lstnew(arg_arr);
-	/*
-	if (is_separate((char *)(*arg_list)->content) == <<)
-	{
-		cmd_list
-		<<
-		t_list *temp  = pre_flag == || && | 인 리스트 포인터
-		|| '|'cat >  < 
-		temp->next_flag ">>", temp->next->content = >> 이후 명령어 -> 이 리스트의 넥스트를 원래 넥스트 명령어로 변경
-	}
-	*/
 	if ((*arg_list) != NULL)
 	{
 		temp->next_flag = is_separate((char *)(*arg_list)->content);
 		(*arg_list) = (*arg_list)->next;
+	}
+	else
+	{
+		temp->next_flag = 0;
 	}
 	if (temp != 0 && ft_lstlast(*cmd_list) != 0)
 		temp->pre_flag = ft_lstlast(*cmd_list)->next_flag;

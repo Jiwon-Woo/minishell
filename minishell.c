@@ -11,6 +11,8 @@ int		get_arg_size(char **arg)
 	int size;
 
 	size = 0;
+	if (arg == 0)
+		return (size);
 	while (arg[size])
 		size++;
 	return (size);
@@ -590,7 +592,7 @@ int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기
 	int		last_slash;
 
 	if (arg_arr[0] == 0)
-		return (0);
+		exit (0);
 	last_slash = get_last_slash_idx(arg_arr[0]);
 	if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
 		return (with_path(arg_arr, envp));
@@ -832,6 +834,46 @@ void set_signal()
 	signal(SIGQUIT, SIG_IGN);
 }
 
+int	is_redirection(int flag)
+{
+	if (flag <= REDIRECT4 && flag >= REDIRECT1)
+		return (1);
+	return (0);
+}
+
+int is_output_redirect(int flag)
+{
+	if (flag == REDIRECT2 || flag == REDIRECT4)
+		return (1);
+	return (0);
+}
+
+int is_input_redirect(int flag)
+{
+	if (flag == REDIRECT1 || flag == REDIRECT3)
+		return (1);
+	return (0);
+}
+
+char **append_strarr(char **str1, char **str2)
+{
+	char 	**ret_strarr;
+	int 	idx;
+	int		i;
+
+	
+	ret_strarr = (char **)malloc(sizeof(char *) * (get_arg_size(str1) + get_arg_size(str2) + 1));
+	i = 0;
+	idx = 0;
+	while(str1 && str1[i])
+		ret_strarr[idx++] = ft_strdup(str1[i++]);
+	i = 0;
+	while(str2 && str2[i])
+		ret_strarr[idx++] = ft_strdup(str2[i++]);
+	ret_strarr[idx] = 0;
+	return(ret_strarr);
+}
+
 void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_envp *envp)
 {
 	char **arg_arr;
@@ -850,6 +892,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 	while (arg_cmd_tmp[1])
 	{
 		arg_arr = (char **)arg_cmd_tmp[1]->content;
+		// fprintf(stderr, "arg_arr : %s, pre_flag = %d next_flag = %d\n", arg_arr[0], arg_cmd_tmp[1]->pre_flag, arg_cmd_tmp[1]->next_flag);
 		pipe(fds[++idx]);
 		/*
 		# define REDIRECT1 (2) // <
@@ -857,53 +900,64 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 		# define REDIRECT3 (4) // <<
 		# define REDIRECT4 (5) // >>
 		*/
-		int fd;
-		if (arg_cmd_tmp[1]->pre_flag == REDIRECT2 || arg_cmd_tmp[1]->pre_flag == REDIRECT4
-			|| arg_cmd_tmp[1]->pre_flag == REDIRECT1)
-		{
-			arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
-			continue ;
-		}
-		if (arg_cmd_tmp[1]->next_flag == REDIRECT1)
-		{
-			fd = open(((char **)(arg_cmd_tmp[1]->next->content))[0], O_RDONLY);
-			if (fd == -1)
-			{
-				fprintf(stderr, "%s: %s: No such file or directory", arg_arr[0], ((char **)(arg_cmd_tmp[1]->next->content))[0]);
-				arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
-				continue ;
-			}
-			if (fork() == 0)
-			{
-				dup2(fd, 0);
-				interpret(arg_arr, envp);
-			}
-			else
-			{
-				wait(&(envp->last_status));
-				close(fd);
-			}
-		}
-		if (arg_cmd_tmp[1]->next_flag == REDIRECT2 || arg_cmd_tmp[1]->next_flag == REDIRECT4)
-		{
-			// int fd;
+		int fd[2];
 
-			if (arg_cmd_tmp[1]->next_flag == REDIRECT2)
-				fd = open(((char **)(arg_cmd_tmp[1]->next->content))[0], O_WRONLY | O_TRUNC | O_CREAT, 0644);
-			if (arg_cmd_tmp[1]->next_flag == REDIRECT4)
-				fd = open(((char **)(arg_cmd_tmp[1]->next->content))[0], O_WRONLY | O_APPEND | O_CREAT, 0644);
+		fd[0] = -1;
+		fd[1] = -1;
+		// if (arg_cmd_tmp[1]->next_flag != NONE && arg_cmd_tmp[1]->next == 0)
+
+		if ( is_redirection(arg_cmd_tmp[1]->pre_flag) == 0 &&
+			is_redirection(arg_cmd_tmp[1]->next_flag) == 1)
+		{
+			// int		input_flag = 0;
+			t_list	*current_cmd = arg_cmd_tmp[1];
+			char	**copy_cmd = append_strarr((char **)(current_cmd->content), 0);
+			while (is_redirection(arg_cmd_tmp[1]->next_flag) && arg_cmd_tmp[1]->next != 0)
+			{
+				arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
+				char **redirect_cmd = arg_cmd_tmp[1]->content;
+				if (is_output_redirect(arg_cmd_tmp[1]->pre_flag) == 1)
+				{
+					if (arg_cmd_tmp[1]->pre_flag == REDIRECT2)
+						fd[1] = open(redirect_cmd[0], O_WRONLY | O_TRUNC | O_CREAT, 0644);
+					if (arg_cmd_tmp[1]->pre_flag == REDIRECT4)
+						fd[1] = open(redirect_cmd[0], O_WRONLY | O_APPEND | O_CREAT, 0644);
+					if (get_arg_size(redirect_cmd) > 1)
+					{
+						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
+						fprintf(stderr, "hihihih: %s %s\n", *(copy_cmd), *(copy_cmd + 1));
+					}
+				}
+				if (arg_cmd_tmp[1]->pre_flag == REDIRECT1)
+				{
+					fd[0] = open(redirect_cmd[0], O_RDONLY);
+					if (fd[0] == -1)
+					{
+						fprintf(stderr, "%s: %s: No such file or directory", arg_arr[0], ((char **)(arg_cmd_tmp[1]->next->content))[0]);
+						continue ;
+					}
+					if (get_arg_size(redirect_cmd) > 1)
+					{
+						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
+					}
+				}
+			}
 			if (fork() == 0)
 			{
-				dup2(fd, 1);
-				interpret(arg_arr, envp);
+				if (fd[0] != -1)
+					dup2(fd[0], 0);
+				if (fd[1] != -1)
+					dup2(fd[1], 1);
+				interpret(copy_cmd, envp);
 			}
 			else
 			{
 				wait(&(envp->last_status));
-				close(fd);
+				close(fd[0]);
+				close(fd[1]);
 			}
 		}
-		if (arg_cmd_tmp[1]->pre_flag == PIPE || arg_cmd_tmp[1]->next_flag == PIPE)
+		else if (arg_cmd_tmp[1]->pre_flag == PIPE || arg_cmd_tmp[1]->next_flag == PIPE)
 		{
 			
 			if (fork() == 0)
