@@ -1,12 +1,12 @@
 #include "minishell.h"
 
-typedef	struct s_qnote
+typedef	struct s_quote
 {
 	int	q_single;
 	int	q_double;
 	int	q_single_index;
 	int	q_double_index;
-}	t_qnote;
+}	t_quote;
 
 
 char	*str_append_char(char *str, char c)
@@ -23,7 +23,6 @@ char	*str_append_char(char *str, char c)
 		ret[i] = str[i];
 	ret[i] = c;
 	ret[i + 1] = 0;
-	// free(str);
 	str = 0;
 	return (ret);
 }
@@ -32,7 +31,7 @@ t_list	*get_arg_list(char *line)
 {
 	t_list 	*arg_list = 0;
 	char	*arg;
-	int	qnote = 0;
+	int	quote = 0;
 
 	while (ft_isspace(*line))
 		line++;
@@ -47,28 +46,28 @@ t_list	*get_arg_list(char *line)
 		if (*line == '\"' || *line == '\'')
 		{
 			if (*line == '\"')
-				qnote = 2;
+				quote = 2;
 			else
-				qnote = 1;
+				quote = 1;
 			line++;
 		}
-		if (qnote == 1)
+		if (quote == 1)
 		{
 			while (*line != '\'' && *line != 0)
 				arg = str_append_char(arg, *(line++));
 			if (*line == '\'')
 			{
-				qnote = 0;
+				quote = 0;
 				line++;
 			}
 		}
-		else if (qnote == 2)
+		else if (quote == 2)
 		{
 			while (*line != '\"' && *line != 0)
 				arg = str_append_char(arg, *(line++));
 			if (*line == '\"')
 			{
-				qnote = 0;
+				quote = 0;
 				line++;
 			}
 		}
@@ -77,7 +76,7 @@ t_list	*get_arg_list(char *line)
 			while (ft_isspace(*line) == 0 && *line != 0)
 				arg = str_append_char(arg, *(line++));
 		}
-		if (qnote != 0)
+		if (quote != 0)
 			exit(1);
 		if (arg != NULL)
 			ft_lstadd_back(&arg_list, ft_lstnew(arg));
@@ -112,28 +111,21 @@ int	main(int argc, char **argv, char **envp)
 	t_list 	*arg_list;
 	char	*line;
 	char	**arg_arr;
-	t_qnote	qnote;
-
-	// signal(SIGINT, (void *)sigint_handler);
-	// signal(SIGINT, SIG_IGN);
+	t_quote	quote;
+	int	i;
 	getcwd(buffer, 1024);
 	prompt = ft_strjoin(buffer, "$ ");
 	line = readline(prompt);
-	qnote.q_single = 1;
-	qnote.q_double = 1;
-	qnote.q_single_index = -1;
-	qnote.q_double_index = -1;
+	init_quote(&quote);
 	while (line != NULL)
 	{
 		add_history(line);
-		check_qnote(line, &qnote);
+		check_quote(line, &quote);
 		arg_list = get_arg_list(line);
 		arg_arr = list_to_char_arr(arg_list);
-		int	i = 0;
+		i = 0;
 		while (arg_arr[i])
-		{
 			printf("%s\n", arg_arr[i++]);
-		}
 		line = readline(prompt);
 	}
 	free(prompt);

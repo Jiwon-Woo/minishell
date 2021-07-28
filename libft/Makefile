@@ -20,7 +20,8 @@ SOURCE = ft_strlen.c \
 	ft_lstiter.c \
 	ft_lstmap.c \
 	ft_lstnew.c \
-	ft_itoa.c
+	ft_itoa.c \
+	ft_split.c
 OBJECT = $(SOURCE:.c=.o)
 
 all: $(NAME)

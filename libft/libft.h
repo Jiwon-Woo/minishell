@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   libft.h                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/12/30 17:35:34 by jwoo              #+#    #+#             */
-/*   Updated: 2021/06/19 17:27:51 by jwoo             ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef LIBFT_H
 # define LIBFT_H
 
@@ -19,7 +7,8 @@
 typedef struct	s_list
 {
 	void			*content;
-	int				pipe_redirect;
+	int				next_flag;
+	int				pre_flag;
 	struct s_list	*next;
 }				t_list;
 
@@ -43,5 +32,6 @@ char			*ft_strdup(char *s1);
 char			*ft_strjoin(char *s1, char *s2);
 int				ft_strlen(char *s);
 int				ft_strncmp(char *s1, char *s2, int n);
+char			**ft_split(char *s, char c);
 
 #endif
