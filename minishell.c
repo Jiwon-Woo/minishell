@@ -1,7 +1,6 @@
 #include "minishell.h"
-int fds[2];
 
-// 파이프 및 리다이렉션, $? 처리, 보너스?? (&& 및 ||, *), string not in pwd ?, arg 갯수 - 에러?,
+// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||, *)
 
 void	sort_envp_idx(t_envp *envp);
 int	file_or_directory(char *arg);
@@ -904,7 +903,6 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 
 		fd[0] = -1;
 		fd[1] = -1;
-		// if (arg_cmd_tmp[1]->next_flag != NONE && arg_cmd_tmp[1]->next == 0)
 
 		if ( is_redirection(arg_cmd_tmp[1]->pre_flag) == 0 &&
 			is_redirection(arg_cmd_tmp[1]->next_flag) == 1)
@@ -912,9 +910,14 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 			// int		input_flag = 0;
 			t_list	*current_cmd = arg_cmd_tmp[1];
 			char	**copy_cmd = append_strarr((char **)(current_cmd->content), 0);
-			while (is_redirection(arg_cmd_tmp[1]->next_flag) && arg_cmd_tmp[1]->next != 0)
+			char *eof;
+			int		current_fds = idx;
+
+			// pipe(fds[++idx]);
+			while (is_redirection(arg_cmd_tmp[1]->next_flag) == 1 && arg_cmd_tmp[1]->next != 0)
 			{
 				arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
+				pipe(fds[++idx]);
 				char **redirect_cmd = arg_cmd_tmp[1]->content;
 				if (is_output_redirect(arg_cmd_tmp[1]->pre_flag) == 1)
 				{
@@ -925,29 +928,57 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 					if (get_arg_size(redirect_cmd) > 1)
 					{
 						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
-						fprintf(stderr, "hihihih: %s %s\n", *(copy_cmd), *(copy_cmd + 1));
+						// fprintf(stderr, "hihihih: %s %s\n", *(copy_cmd), *(copy_cmd + 1));
 					}
 				}
 				if (arg_cmd_tmp[1]->pre_flag == REDIRECT1)
 				{
 					fd[0] = open(redirect_cmd[0], O_RDONLY);
+					if (get_arg_size(redirect_cmd) > 1)
+					{
+						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
+					}
 					if (fd[0] == -1)
 					{
 						fprintf(stderr, "%s: %s: No such file or directory", arg_arr[0], ((char **)(arg_cmd_tmp[1]->next->content))[0]);
 						continue ;
 					}
+				}
+				if (arg_cmd_tmp[1]->pre_flag == REDIRECT3)
+				{
+					char *line = readline("> ");
+					// fprintf(stderr, "line_1 : %s\n", line);
+					// fprintf(stderr, "red_cmd = %s\n", redirect_cmd[0]);
+					// fprintf(stderr, "hihi : %d\n", ft_strncmp(line, redirect_cmd[0], ft_strlen(redirect_cmd[0]) + 1));
 					if (get_arg_size(redirect_cmd) > 1)
 					{
 						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
 					}
+					// eof = ft_strdup("");
+					while (line != NULL && ft_strncmp(line, redirect_cmd[0], ft_strlen(redirect_cmd[0]) + 1) != 0)
+					{
+						// eof = ft_strjoin(eof, ft_strjoin(line, "\n"));
+						write(fds[idx][1], line, ft_strlen(line));
+						write(fds[idx][1], "\n", 1);
+						line = readline("> ");
+						// copy_cmd[last_idx] = ft_strjoin(ft_strjoin(copy_cmd[last_idx], "\n"), line);
+						// write(fds[idx][1], eof, ft_strlen(eof));
+						// fprintf(stderr, "line_2 : %s\n", line);
+					}
+					close(fds[idx][1]);
+					fd[0] = fds[idx][0];
 				}
 			}
 			if (fork() == 0)
 			{
 				if (fd[0] != -1)
 					dup2(fd[0], 0);
+				else if (current_cmd->pre_flag == PIPE)
+					dup2(fds[current_fds - 1][0], 0);
 				if (fd[1] != -1)
 					dup2(fd[1], 1);
+				else if (arg_cmd_tmp[1]->next_flag == PIPE)
+					dup2(fds[idx][1], 1);
 				interpret(copy_cmd, envp);
 			}
 			else
@@ -955,11 +986,16 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 				wait(&(envp->last_status));
 				close(fd[0]);
 				close(fd[1]);
+				close(fds[current_fds - 1][0]);
+				close(fds[idx][1]);
 			}
+			// arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
+			// if (arg_cmd_tmp[1] == 0)
+			// 	continue ;
+			// pipe(fds[++idx]);
 		}
-		else if (arg_cmd_tmp[1]->pre_flag == PIPE || arg_cmd_tmp[1]->next_flag == PIPE)
+		else if (arg_cmd_tmp[1]->pre_flag == PIPE || (arg_cmd_tmp[1]->next_flag == PIPE))
 		{
-			
 			if (fork() == 0)
 			{
 				if (arg_cmd_tmp[1]->pre_flag == PIPE)

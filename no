@@ -1,4 +1,0 @@
-second
-cat
-last
-cat
