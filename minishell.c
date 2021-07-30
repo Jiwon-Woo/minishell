@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||, *)
+// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||, *) / fork 언제 하는게 좋을지.. /
 
 void	sort_envp_idx(t_envp *envp);
 int	file_or_directory(char *arg);
@@ -132,7 +132,18 @@ void	without_eq(char **arg_arr, t_envp *envp, int i)
 	if (envp->envp_list[j] == 0)
 		envp_add(envp, arg_arr[i]);
 }
-
+// int	export_validation(arg_arr[i])
+// {
+// 	if (/* condition */)
+// 	{
+// 		/* code */
+// 	}
+// 	else
+// 	{
+		
+// 	}
+	
+// }
 int		mini_export(char **arg_arr, t_envp *envp)
 {
 	int	i;
@@ -144,10 +155,12 @@ int		mini_export(char **arg_arr, t_envp *envp)
 	if (get_arg_size(arg_arr) == 1) // print
 	{
 		print_export(envp);
-		exit (0);
+		return (0);
 	}
 	while (arg_arr[i])
-	{
+	{//에러처리?
+		// if (export_validation(arg_arr[i]) == -1)
+		// 	fprintf(stderr, "bash: export: `%s': not a valid identifier", arg_arr[i]);
 		if (get_equal_idx(arg_arr[i]) > 0) // = 이 있는 인자가 들어옴
 		{
 			with_eq(arg_arr, envp, i);
@@ -188,7 +201,7 @@ int		mini_export(char **arg_arr, t_envp *envp)
 		i++;
 	}
 	sort_envp_idx(envp);
-	exit (0);
+	return (0);
 }
 
 int mini_pwd(char **arg, t_envp *envp)
@@ -247,15 +260,34 @@ int mini_cd(char **arg, t_envp *envp) //envp 추가!
 		free(*pwd);
 		*pwd = ft_strjoin("PWD=", buf);
 		free(buf);
-		exit (1);
+		return (1);
 	}
-	exit (-1);
+	return (-1);
 }
 
-int mini_exit()
+int mini_exit(char **arg_arr, t_envp *envp)
 {
+	int ret;
+	int error;
+
+	error = 0;
+	if (arg_arr == 0 || arg_arr[1] == 0)
+		ret = envp->last_status;
+	else
+		error = ft_atoi(arg_arr[1], &ret);
 	fprintf(stderr, "exit\n");
-	exit (0);
+	if (error == -1)
+	{
+		fprintf(stderr, "bash: exit: %s: numeric argument required\n", arg_arr[1]);
+		ret = 255;
+	}
+	else if (get_arg_size(arg_arr) > 2)
+	{
+		fprintf(stderr, "bash: exit: too many arguments\n");
+		envp->last_status = 1;
+		return (1);
+	}
+	exit (((int)(char)(ret)));
 }
 
 char *parse_path(t_envp *envp)//path 환경변수 받아오기
@@ -301,7 +333,7 @@ int mini_unset(char **arg, t_envp *envp)
 
 	size = get_arg_size(arg);
 	if (size == 1)
-		exit (1);
+		return (1);
 	i = 0;
 	while (++i < size)
 	{
@@ -339,7 +371,7 @@ int mini_unset(char **arg, t_envp *envp)
 		}
 	}
 	sort_envp_idx(envp);
-	exit (0);
+	return (0);
 }
 
 int mini_status(char **arg_arr, t_envp *envp)
@@ -352,7 +384,7 @@ int mini_status(char **arg_arr, t_envp *envp)
 	write(2, status, ft_strlen(status));
 	free(status);
 	write(2, ": command not found\n", ft_strlen(": command not found\n"));
-	exit (127);
+	return (127);
 }
 
 int	get_last_slash_idx(char *arg)
@@ -519,7 +551,7 @@ int with_path(char **arg_arr, t_envp *envp)
 			exit (1);
 		}
 	}
-	exit (0);
+	return (0);
 }
 
 int exec_file(char *path, char **arg_arr, t_envp *envp)
@@ -539,7 +571,7 @@ int exec_file(char *path, char **arg_arr, t_envp *envp)
 		free(path);
 		path = 0;
 	}
-	exit (0);
+	return (0);
 }
 
 int without_path(char **arg_arr, t_envp *envp)
@@ -579,34 +611,86 @@ int without_path(char **arg_arr, t_envp *envp)
 		}
 		fprintf(stderr, "bash: %s: command not found\n", arg_arr[0]);
 		strerror(errno);
-		exit (127);
+		return (127);
 	}
 	return(0);
 }
 
-int interpret(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
+int	is_not_builtin(char **arg_arr)
+{
+	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
+		return (1);
+	if (ft_strncmp(arg_arr[0], "export", 7) == 0)
+		return (1);
+	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
+		return (1);
+	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
+		return (1);
+	if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
+		return (1);
+	return (0);
+}
+
+// void	none_builtin(char **arg_arr)
+// {
+// 	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
+// 		return (mini_cd(arg_arr, envp));
+// 	if (ft_strncmp(arg_arr[0], "export", 7) == 0)
+// 		return (mini_export(arg_arr, envp));
+// 	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
+// 		return (mini_unset(arg_arr, envp));
+// 	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
+// 		return (mini_exit(arg_arr, envp));
+// 	if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
+// 		return (mini_status(arg_arr, envp));
+// }
+
+int	interpret(char **arg_arr, t_envp *envp, int *fd) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
 {
 	int		status;
 	t_envp  envp_;
 	int		last_slash;
 
 	if (arg_arr[0] == 0)
-		exit (0);
+		return (0);
 	last_slash = get_last_slash_idx(arg_arr[0]);
-	if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
-		return (with_path(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
-		return (mini_cd(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0], "export", 7) == 0)
-		return (mini_export(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
-		return (mini_unset(arg_arr, envp));
-	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
-		return (mini_exit());
-	if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
-		return (mini_status(arg_arr, envp));
-	if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
-		return (without_path(arg_arr, envp));
+	if (is_not_builtin(arg_arr) == 1)
+	{
+		if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
+			return (mini_cd(arg_arr, envp));
+		if (ft_strncmp(arg_arr[0], "export", 7) == 0)
+			return (mini_export(arg_arr, envp));
+		if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
+			return (mini_unset(arg_arr, envp));
+		if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
+			return (mini_exit(arg_arr, envp));
+		if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
+			return (mini_status(arg_arr, envp));
+	}
+	else if (fork() == 0)
+	{
+		if (fd[0] != -1)
+			dup2(fd[0], 0);
+		if (fd[1] != -1)
+			dup2(fd[1], 1);
+		if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
+		{
+			return (with_path(arg_arr, envp));
+		}
+		else // 인자가 경로로 주어지지 않을 때
+			return (without_path(arg_arr, envp));
+	}
+	else
+	{
+		wait(&(envp->last_status));
+		envp->last_status = WEXITSTATUS(envp->last_status);
+		close(fd[0]);
+		close(fd[1]);
+		// if (error_file != 0)
+		// 	close(0);
+		// close(fds[current_fds - 1][0]);
+		// close(fds[idx][1]);
+	}
 	return (127);
 }
 
@@ -877,6 +961,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 {
 	char **arg_arr;
 
+	// set_signal();
 	add_history(line_prompt[0]);
 	check_quote(line_prompt[0], quote);
 	arg_cmd_tmp[0] = get_arg_list(line_prompt[0], *quote);//t_list **arg_cmd_tmp
@@ -888,6 +973,11 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 	int idx = -1;
 	// int status;
 
+	// if (size == 1 && ft_strncmp(((char **)(arg_cmd_tmp[1]->content))[0], "exit", 5) == 0)
+	// {
+	// 	envp->last_status =  mini_exit((char **)(arg_cmd_tmp[1]->content), envp);
+	// 	return;
+	// }
 	while (arg_cmd_tmp[1])
 	{
 		arg_arr = (char **)arg_cmd_tmp[1]->content;
@@ -904,16 +994,14 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 		fd[0] = -1;
 		fd[1] = -1;
 
-		if ( is_redirection(arg_cmd_tmp[1]->pre_flag) == 0 &&
+		t_list	*current_cmd = arg_cmd_tmp[1];
+		char	**copy_cmd = append_strarr((char **)(current_cmd->content), 0);
+		int		current_fds = idx;
+		char	*error_file = 0;
+
+		if (is_redirection(current_cmd->pre_flag) == 0 &&
 			is_redirection(arg_cmd_tmp[1]->next_flag) == 1)
 		{
-			// int		input_flag = 0;
-			t_list	*current_cmd = arg_cmd_tmp[1];
-			char	**copy_cmd = append_strarr((char **)(current_cmd->content), 0);
-			char *eof;
-			int		current_fds = idx;
-
-			// pipe(fds[++idx]);
 			while (is_redirection(arg_cmd_tmp[1]->next_flag) == 1 && arg_cmd_tmp[1]->next != 0)
 			{
 				arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
@@ -934,13 +1022,17 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 				if (arg_cmd_tmp[1]->pre_flag == REDIRECT1)
 				{
 					fd[0] = open(redirect_cmd[0], O_RDONLY);
+					// fprintf(stderr, "fd[0] : %d\n", fd[0]);
 					if (get_arg_size(redirect_cmd) > 1)
 					{
 						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
 					}
 					if (fd[0] == -1)
 					{
-						fprintf(stderr, "%s: %s: No such file or directory", arg_arr[0], ((char **)(arg_cmd_tmp[1]->next->content))[0]);
+						// fprintf(stderr, "redirect_cmd[0] : %s\n", redirect_cmd[0]);
+						// fprintf(stderr, "%s: %s: No such file or directory\n", arg_arr[0], redirect_cmd[0]);
+						if (error_file == 0)
+							error_file = ft_strdup(redirect_cmd[0]);
 						continue ;
 					}
 				}
@@ -958,87 +1050,127 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 					while (line != NULL && ft_strncmp(line, redirect_cmd[0], ft_strlen(redirect_cmd[0]) + 1) != 0)
 					{
 						// eof = ft_strjoin(eof, ft_strjoin(line, "\n"));
-						write(fds[idx][1], line, ft_strlen(line));
-						write(fds[idx][1], "\n", 1);
+						write(fds[idx - 1][1], line, ft_strlen(line));
+						write(fds[idx - 1][1], "\n", 1);
 						line = readline("> ");
 						// copy_cmd[last_idx] = ft_strjoin(ft_strjoin(copy_cmd[last_idx], "\n"), line);
 						// write(fds[idx][1], eof, ft_strlen(eof));
 						// fprintf(stderr, "line_2 : %s\n", line);
 					}
-					close(fds[idx][1]);
-					fd[0] = fds[idx][0];
+					close(fds[idx - 1][1]);
+					fd[0] = fds[idx - 1][0];
 				}
 			}
-			if (fork() == 0)
+			if (is_redirection(arg_cmd_tmp[1]->next_flag) == 1 && arg_cmd_tmp[1]->next == 0)
 			{
-				if (fd[0] != -1)
-					dup2(fd[0], 0);
-				else if (current_cmd->pre_flag == PIPE)
-					dup2(fds[current_fds - 1][0], 0);
-				if (fd[1] != -1)
-					dup2(fd[1], 1);
-				else if (arg_cmd_tmp[1]->next_flag == PIPE)
-					dup2(fds[idx][1], 1);
-				interpret(copy_cmd, envp);
+				fprintf(stderr, "bash: syntax error near unexpected token `newline'\n");
+				envp->last_status = 258;
+				return;
 			}
-			else
+			if (error_file != 0)
 			{
-				wait(&(envp->last_status));
-				close(fd[0]);
-				close(fd[1]);
-				close(fds[current_fds - 1][0]);
-				close(fds[idx][1]);
+				fprintf(stderr, "bash: %s: No such file or directory\n", error_file);
+				envp->last_status = 1;
+				return;
 			}
-			// arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
-			// if (arg_cmd_tmp[1] == 0)
-			// 	continue ;
-			// pipe(fds[++idx]);
+			// if (fork() == 0)
+			// {
+			// 	if (fd[0] != -1)
+			// 		dup2(fd[0], 0);
+			// 	else if (current_cmd->pre_flag == PIPE)
+			// 		dup2(fds[current_fds - 1][0], 0);
+			// 	if (fd[1] != -1)
+			// 		dup2(fd[1], 1);
+			// 	else if (arg_cmd_tmp[1]->next_flag == PIPE)
+			// 		dup2(fds[idx][1], 1);
+			// 	interpret(copy_cmd, envp);
+			// }
+			// else
+			// {
+			// 	wait(&(envp->last_status));
+			// 	close(fd[0]);
+			// 	close(fd[1]);
+			// 	close(fds[current_fds - 1][0]);
+			// 	close(fds[idx][1]);
+			// }
 		}
-		else if (arg_cmd_tmp[1]->pre_flag == PIPE || (arg_cmd_tmp[1]->next_flag == PIPE))
+		if (current_cmd->pre_flag == PIPE || (arg_cmd_tmp[1]->next_flag == PIPE))
 		{
-			if (fork() == 0)
+			if (current_cmd->pre_flag == PIPE && fd[0] == -1)
+				fd[0] = fds[current_fds - 1][0];
+			if (arg_cmd_tmp[1]->next_flag == PIPE && ((char **)(current_cmd->content))[0] == 0)
 			{
-				if (arg_cmd_tmp[1]->pre_flag == PIPE)
-				{
-					dup2(fds[idx - 1][0], 0);
-				}
-				if (arg_cmd_tmp[1]->next_flag == PIPE)
-				{
-					dup2(fds[idx][1], 1);
-				}
-				interpret(arg_arr, envp);
+				fprintf(stderr, "bash: syntax error near unexpected token `|'\n");
+				envp->last_status = 258;
+				return;
 			}
-			else
-			{
-				wait(&(envp->last_status));
-				close(fds[idx - 1][0]);
-				close(fds[idx][1]);
-				envp->last_status = WEXITSTATUS(envp->last_status);
-			}
+			else if (arg_cmd_tmp[1]->next_flag == PIPE && fd[1] == -1)
+				fd[1] = fds[idx][1];
+			// if (fork() == 0)
+			// {
+			// 	if (arg_cmd_tmp[1]->pre_flag == PIPE)
+			// 	{
+			// 		dup2(fds[idx - 1][0], 0);
+			// 	}
+			// 	if (arg_cmd_tmp[1]->next_flag == PIPE)
+			// 	{
+			// 		dup2(fds[idx][1], 1);
+			// 	}
+			// 	interpret(arg_arr, envp);
+			// }
+			// else
+			// {
+			// 	wait(&(envp->last_status));
+			// 	close(fds[idx - 1][0]);
+			// 	close(fds[idx][1]);
+			// 	envp->last_status = WEXITSTATUS(envp->last_status);
+			// }
 		}
-		else if (arg_cmd_tmp[1]->next_flag == NONE)
-		{
-			if (fork() == 0)
-				interpret(arg_arr, envp);
-			else
-			{
-				wait(&(envp->last_status));
-				envp->last_status = WEXITSTATUS(envp->last_status);
-			}
-		}
+		// else if (ft_strncmp(((char **)(current_cmd->content))[0], "exit", 5) == 0)
+		// {
+		// 	envp->last_status =  mini_exit((char **)(arg_cmd_tmp[1]->content), envp);
+		// 	return;
+		// }
+		interpret(copy_cmd, envp, fd);
+		// if (fork() == 0)
+		// {
+		// 	if (fd[0] != -1)
+		// 		dup2(fd[0], 0);
+		// 	if (fd[1] != -1)
+		// 		dup2(fd[1], 1);
+		// 	// interpret(copy_cmd, envp, fd);
+		// }
+		// else
+		// {
+		// 	wait(&(envp->last_status));
+		// 	envp->last_status = WEXITSTATUS(envp->last_status);
+		// 	close(fd[0]);
+		// 	close(fd[1]);
+		// 	// if (error_file != 0)
+		// 	// 	close(0);
+		// 	// close(fds[current_fds - 1][0]);
+		// 	// close(fds[idx][1]);
+		// }
+		// else if (arg_cmd_tmp[1]->next_flag == NONE)
+		// {
+		// 	if (fork() == 0)
+		// 		interpret(arg_arr, envp);
+		// 	else
+		// 	{
+		// 		wait(&(envp->last_status));
+		// 		envp->last_status = WEXITSTATUS(envp->last_status);
+		// 	}
+		// }
+		// else
 		arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
 	}
-	// close(fds[size - 1][0]);
-	// close(fds[size - 1][1]);
 	arg_cmd_tmp[1] = arg_cmd_tmp[2];
-	free(line_prompt[0]);
-	free(line_prompt[1]);
-	line_prompt[1] = make_prompt();
-	line_prompt[0] = readline(line_prompt[1]);
+	// free(line_prompt[0]);
+	// free(line_prompt[1]);
+	// line_prompt[1] = make_prompt();
+	// line_prompt[0] = readline(line_prompt[1]);
 	ft_lstclear(&arg_cmd_tmp[0], free);
 	ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
-	// free(arg_cmd_tmp[0]);
-	// free(arg_cmd_tmp[1]);
 }
 
 int	main(int argc, char **argv, char **first_envp)
@@ -1058,8 +1190,16 @@ int	main(int argc, char **argv, char **first_envp)
 	line_prompt[1] = make_prompt();
 	line_prompt[0] = readline(line_prompt[1]);
 	while (line_prompt[0] != NULL)
+	{
 		handle_line(line_prompt, arg_cmd_tmp, &quote, &envp);
+		free(line_prompt[0]);
+		free(line_prompt[1]);
+		line_prompt[1] = make_prompt();
+		line_prompt[0] = readline(line_prompt[1]);
+		// ft_lstclear(&arg_cmd_tmp[0], free);
+		// ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
+	}
 	free(line_prompt[1]);
-	mini_exit();
+	mini_exit(0, &envp);
 	return (0);
 }
