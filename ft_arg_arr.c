@@ -175,7 +175,7 @@ int without_quote(char **ret, char *cmd_line, int i)
 {
 	if (cmd_line[i] == '\'' || cmd_line[i] == '\"')
 		*ret = str_append_char(*ret, cmd_line[i++]);
-	while (cmd_line[i] != '\'' && cmd_line[i] != '\"' && cmd_line[i] != 0)
+	while (cmd_line[i] != '\'' && cmd_line[i] != '\"' && cmd_line[i] != '$' && cmd_line[i] != 0)
 		*ret = str_append_char(*ret, cmd_line[i++]);
 	return (i);
 }

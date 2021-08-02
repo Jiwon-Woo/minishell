@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||, *) / fork 언제 하는게 좋을지.. /
+// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||, *) / fork 언제 ㅎ
 
 void	sort_envp_idx(t_envp *envp);
 int	file_or_directory(char *arg);
@@ -275,7 +275,6 @@ int mini_exit(char **arg_arr, t_envp *envp)
 		ret = envp->last_status;
 	else
 		error = ft_atoi(arg_arr[1], &ret);
-	fprintf(stderr, "exit\n");
 	if (error == -1)
 	{
 		fprintf(stderr, "bash: exit: %s: numeric argument required\n", arg_arr[1]);
@@ -284,8 +283,11 @@ int mini_exit(char **arg_arr, t_envp *envp)
 	else if (get_arg_size(arg_arr) > 2)
 	{
 		fprintf(stderr, "bash: exit: too many arguments\n");
-		envp->last_status = 1;
-		return (1);
+		ret = 1;
+	}
+	else
+	{
+		fprintf(stderr, "exit\n");
 	}
 	exit (((int)(char)(ret)));
 }
@@ -542,7 +544,7 @@ int with_path(char **arg_arr, t_envp *envp)
 	stat = file_or_directory(arg_arr[0]);
 	if (stat != 0) // 존재하지 않는 명령?파일?디렉토리면 바로 종료
 	{
-		exit (stat); // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없는 이유 출력 (경로가 있는 명령어)
+		return (stat); // 실행 파일이 존재하지 않으면 명령어를 찾을 수 없는 이유 출력 (경로가 있는 명령어)
 	}
 	else
 	{
@@ -564,7 +566,7 @@ int exec_file(char *path, char **arg_arr, t_envp *envp)
 			path = 0;
 		}
 		strerror(errno);////////
-		exit (1);
+		return (1);
 	}
 	if (path != 0)
 	{
@@ -645,115 +647,7 @@ int	is_not_builtin(char **arg_arr)
 // 		return (mini_status(arg_arr, envp));
 // }
 
-int	interpret(char **arg_arr, t_envp *envp, int *fd) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
-{
-	int		status;
-	t_envp  envp_;
-	int		last_slash;
 
-	if (arg_arr[0] == 0)
-		return (0);
-	last_slash = get_last_slash_idx(arg_arr[0]);
-	if (is_not_builtin(arg_arr) == 1)
-	{
-		if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
-			return (mini_cd(arg_arr, envp));
-		if (ft_strncmp(arg_arr[0], "export", 7) == 0)
-			return (mini_export(arg_arr, envp));
-		if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
-			return (mini_unset(arg_arr, envp));
-		if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
-			return (mini_exit(arg_arr, envp));
-		if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
-			return (mini_status(arg_arr, envp));
-	}
-	else if (fork() == 0)
-	{
-		if (fd[0] != -1)
-			dup2(fd[0], 0);
-		if (fd[1] != -1)
-			dup2(fd[1], 1);
-		if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
-		{
-			return (with_path(arg_arr, envp));
-		}
-		else // 인자가 경로로 주어지지 않을 때
-			return (without_path(arg_arr, envp));
-	}
-	else
-	{
-		wait(&(envp->last_status));
-		envp->last_status = WEXITSTATUS(envp->last_status);
-		close(fd[0]);
-		close(fd[1]);
-		// if (error_file != 0)
-		// 	close(0);
-		// close(fds[current_fds - 1][0]);
-		// close(fds[idx][1]);
-	}
-	return (127);
-}
-
-
-// int interpret(t_list *cmd_list, t_envp *envp) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
-// {
-// 	int		status;
-// 	t_envp  envp_;
-// 	int		last_slash;
-// 	int		fds1[2];
-// 	int		fds2[2];
-
-// 	if (((char **)(cmd_list->content))[0] == 0)
-// 		return (0);
-// 	last_slash = get_last_slash_idx(((char **)(cmd_list->content))[0]);
-// 	if (ft_strncmp(((char **)(cmd_list->content))[0], "exit", 5) == 0)
-// 		mini_exit();
-// 	// fprintf(fds[1], "0");
-// 	pipe(fds1);
-// 	pipe(fds2);
-// 	pid_t pid = fork();
-// 	if (pid == 0)
-// 	{
-// 		if (cmd_list->pre_flag == PIPE || cmd_list->next_flag == PIPE)
-// 		{
-// 			// fprintf(stderr, "fds1 = %d %d  fds2 = %d %d \n", fds1[0], fds1[1], fds2[0], fds2[1]);
-// 			if (cmd_list->pre_flag == PIPE)
-// 			{
-// 				close(fds1[1]);
-// 				dup2(fds1[0], 0); // 0 -> STDIN 대신에 파이프로 오는 입력을 받아라 , 1-> STDOUT-> 파이프에다 출력해라/쓰기채널 = fd[1] 읽기채널 = fd[0]
-// 				close(fds1[0]);
-// 			}
-// 			if (cmd_list->next_flag == PIPE)
-// 			{
-// 				close(fds1[0]);
-// 				dup2(fds1[1], 1); // 0 -> STDIN 대신에 파이프로 오는 입력을 받아라 , 1-> STDOUT-> 파이프에다 출력해라/쓰기채널 = fd[1] 읽기채널 = fd[0]
-// 				// close(fds1[1]);
-// 			}
-// 		}
-// 		if (last_slash != -1)
-// 			with_path(((char **)(cmd_list->content)), envp);
-// 		if (ft_strncmp(((char **)(cmd_list->content))[0], "cd", 3) == 0)
-// 			mini_cd(((char **)(cmd_list->content)), envp);
-// 		if (ft_strncmp(((char **)(cmd_list->content))[0], "export", 7) == 0)
-// 			mini_export(((char **)(cmd_list->content)), envp);
-// 		if (ft_strncmp(((char **)(cmd_list->content))[0], "unset", 6) == 0)
-// 			mini_unset(((char **)(cmd_list->content)), envp);
-// 		// if (ft_strncmp(((char **)(cmd_list->content))[0], "exit", 5) == 0)
-// 		// 	mini_exit();
-// 		if (ft_strncmp(((char **)(cmd_list->content))[0], "$?", 3) == 0)
-// 			mini_status(((char **)(cmd_list->content)), envp);
-// 		if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
-// 			without_path(((char **)(cmd_list->content)), envp);
-// 	}
-// 	// if (cmd_list->pre_flag == PIPE)
-// 	// {
-// 	// 	close(4);
-// 	// 	dup2(3, 0); // 0 -> STDIN 대신에 파이프로 오는 입력을 받아라 , 1-> STDOUT-> 파이프에다 출력해라/쓰기채널 = fd[1] 읽기채널 = fd[0]
-// 	// 	close(3);
-// 	// }
-// 	wait(&status);
-// 	return (127);
-// }
 
 
 void	check_quote(char *line, t_quote *quote)
@@ -957,6 +851,67 @@ char **append_strarr(char **str1, char **str2)
 	return(ret_strarr);
 }
 
+int	interpret(char **arg_arr, t_envp *envp, int *fd) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
+{
+	int		status;
+	t_envp  envp_;
+	int		last_slash;
+
+	if (arg_arr[0] == 0)
+		return (0);
+	last_slash = get_last_slash_idx(arg_arr[0]);
+	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
+		return (mini_cd(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "export", 7) == 0)
+		return (mini_export(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
+		return (mini_unset(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
+		return (mini_exit(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
+		return (mini_status(arg_arr, envp));
+	if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
+		return (with_path(arg_arr, envp));
+	else if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
+		return (without_path(arg_arr, envp));
+	return (127);
+}
+
+int	interpret2(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
+{
+	int		status;
+	t_envp  envp_;
+	int		last_slash;
+
+	if (arg_arr[0] == 0)
+		return (0);
+	last_slash = get_last_slash_idx(arg_arr[0]);
+	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
+		return (mini_cd(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "export", 7) == 0)
+		return (mini_export(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
+		return (mini_unset(arg_arr, envp));
+	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
+		return (mini_exit(arg_arr, envp));
+	// if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
+	// 	return (mini_status(arg_arr, envp));
+	if (fork() == 0)
+	{
+		if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
+			exit (with_path(arg_arr, envp));
+		else if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
+			exit (without_path(arg_arr, envp));
+	}
+	else
+	{
+		wait(&(envp->last_status));
+		envp->last_status = WEXITSTATUS(envp->last_status);
+		return (envp->last_status);
+	}
+	return (127);
+}
+
 void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_envp *envp)
 {
 	char **arg_arr;
@@ -1038,27 +993,22 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 				}
 				if (arg_cmd_tmp[1]->pre_flag == REDIRECT3)
 				{
-					char *line = readline("> ");
-					// fprintf(stderr, "line_1 : %s\n", line);
-					// fprintf(stderr, "red_cmd = %s\n", redirect_cmd[0]);
-					// fprintf(stderr, "hihi : %d\n", ft_strncmp(line, redirect_cmd[0], ft_strlen(redirect_cmd[0]) + 1));
 					if (get_arg_size(redirect_cmd) > 1)
 					{
 						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
 					}
-					// eof = ft_strdup("");
+					char *store = ft_strdup(rl_line_buffer);
+					char *line = readline("> ");
 					while (line != NULL && ft_strncmp(line, redirect_cmd[0], ft_strlen(redirect_cmd[0]) + 1) != 0)
 					{
-						// eof = ft_strjoin(eof, ft_strjoin(line, "\n"));
 						write(fds[idx - 1][1], line, ft_strlen(line));
 						write(fds[idx - 1][1], "\n", 1);
 						line = readline("> ");
-						// copy_cmd[last_idx] = ft_strjoin(ft_strjoin(copy_cmd[last_idx], "\n"), line);
-						// write(fds[idx][1], eof, ft_strlen(eof));
-						// fprintf(stderr, "line_2 : %s\n", line);
 					}
+					rl_line_buffer = store;
 					close(fds[idx - 1][1]);
 					fd[0] = fds[idx - 1][0];
+					// close(fds[idx - 1][0]);
 				}
 			}
 			if (is_redirection(arg_cmd_tmp[1]->next_flag) == 1 && arg_cmd_tmp[1]->next == 0)
@@ -1073,26 +1023,6 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 				envp->last_status = 1;
 				return;
 			}
-			// if (fork() == 0)
-			// {
-			// 	if (fd[0] != -1)
-			// 		dup2(fd[0], 0);
-			// 	else if (current_cmd->pre_flag == PIPE)
-			// 		dup2(fds[current_fds - 1][0], 0);
-			// 	if (fd[1] != -1)
-			// 		dup2(fd[1], 1);
-			// 	else if (arg_cmd_tmp[1]->next_flag == PIPE)
-			// 		dup2(fds[idx][1], 1);
-			// 	interpret(copy_cmd, envp);
-			// }
-			// else
-			// {
-			// 	wait(&(envp->last_status));
-			// 	close(fd[0]);
-			// 	close(fd[1]);
-			// 	close(fds[current_fds - 1][0]);
-			// 	close(fds[idx][1]);
-			// }
 		}
 		if (current_cmd->pre_flag == PIPE || (arg_cmd_tmp[1]->next_flag == PIPE))
 		{
@@ -1106,62 +1036,45 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 			}
 			else if (arg_cmd_tmp[1]->next_flag == PIPE && fd[1] == -1)
 				fd[1] = fds[idx][1];
-			// if (fork() == 0)
-			// {
-			// 	if (arg_cmd_tmp[1]->pre_flag == PIPE)
-			// 	{
-			// 		dup2(fds[idx - 1][0], 0);
-			// 	}
-			// 	if (arg_cmd_tmp[1]->next_flag == PIPE)
-			// 	{
-			// 		dup2(fds[idx][1], 1);
-			// 	}
-			// 	interpret(arg_arr, envp);
-			// }
-			// else
-			// {
-			// 	wait(&(envp->last_status));
-			// 	close(fds[idx - 1][0]);
-			// 	close(fds[idx][1]);
-			// 	envp->last_status = WEXITSTATUS(envp->last_status);
-			// }
+			if (fork() == 0)
+			{
+				if (fd[0] != -1)
+					dup2(fd[0], 0);
+				if (fd[1] != -1)
+					dup2(fd[1], 1);
+				exit (interpret(copy_cmd, envp, fd));
+			}
+			else
+			{
+				wait(&(envp->last_status));
+				envp->last_status = WEXITSTATUS(envp->last_status);
+				close(fd[0]);
+				close(fd[1]);
+			}
+		}
+		else
+		{
+			int backup[2];
+			pipe(backup);
+			dup2(0, backup[0]);
+			dup2(1, backup[1]);
+			if (fd[0] != -1)
+				dup2(fd[0], 0);
+			if (fd[1] != -1)
+				dup2(fd[1], 1);
+			envp->last_status = interpret2(copy_cmd, envp);
+			dup2(backup[0], 0);
+			dup2(backup[1], 1);
+			close(backup[0]);
+			close(backup[1]);
+			close(fd[0]);
+			close(fd[1]);
 		}
 		// else if (ft_strncmp(((char **)(current_cmd->content))[0], "exit", 5) == 0)
 		// {
 		// 	envp->last_status =  mini_exit((char **)(arg_cmd_tmp[1]->content), envp);
 		// 	return;
-		// }
-		interpret(copy_cmd, envp, fd);
-		// if (fork() == 0)
-		// {
-		// 	if (fd[0] != -1)
-		// 		dup2(fd[0], 0);
-		// 	if (fd[1] != -1)
-		// 		dup2(fd[1], 1);
-		// 	// interpret(copy_cmd, envp, fd);
-		// }
-		// else
-		// {
-		// 	wait(&(envp->last_status));
-		// 	envp->last_status = WEXITSTATUS(envp->last_status);
-		// 	close(fd[0]);
-		// 	close(fd[1]);
-		// 	// if (error_file != 0)
-		// 	// 	close(0);
-		// 	// close(fds[current_fds - 1][0]);
-		// 	// close(fds[idx][1]);
-		// }
-		// else if (arg_cmd_tmp[1]->next_flag == NONE)
-		// {
-		// 	if (fork() == 0)
-		// 		interpret(arg_arr, envp);
-		// 	else
-		// 	{
-		// 		wait(&(envp->last_status));
-		// 		envp->last_status = WEXITSTATUS(envp->last_status);
-		// 	}
-		// }
-		// else
+		// }s
 		arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
 	}
 	arg_cmd_tmp[1] = arg_cmd_tmp[2];
