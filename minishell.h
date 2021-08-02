@@ -12,6 +12,7 @@
 # include <unistd.h>
 # include <errno.h>
 # include <string.h>
+# include <stdbool.h>
 # include "libft/libft.h"
 
 # define NONE 0

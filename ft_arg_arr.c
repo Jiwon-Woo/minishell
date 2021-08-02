@@ -93,8 +93,8 @@ int find_env_in_double_quote(char **ret, char *cmd_line, int i, t_envp *envp)
 	check_single_in_double(cmd_line, i, &quote);
 	key = 0;
 	while (cmd_line[i] != 0 && ft_isspace(cmd_line[i]) == 0
-		&& cmd_line[i] != '$' && cmd_line[i] != '?'
-		&& cmd_line[i] != '\"' && !(cmd_line[i] == '\'' && i != quote.q_single_index))
+		&& cmd_line[i] != '$' && cmd_line[i] != '?' && cmd_line[i] != '='
+		&& cmd_line[i] != '\"' && cmd_line[i] != '\'')
 	{
 		key = str_append_char(key, cmd_line[i++]);
 	}
@@ -124,8 +124,10 @@ int find_env_without_quote(char **ret, char *cmd_line, int i, t_envp *envp)
 	init_quote(&quote);
 	check_quote(cmd_line, &quote);
 	key = 0;
-	while (cmd_line[i] != 0 && (!(cmd_line[i] == '\"' && i != quote.q_double_index)
-		&& !(cmd_line[i] == '\'' && i != quote.q_single_index))
+	// while (cmd_line[i] != 0 && (!(cmd_line[i] == '\"' && i != quote.q_double_index)
+	// 	&& !(cmd_line[i] == '\'' && i != quote.q_single_index)) && cmd_line[i] != '='
+	// 	&& cmd_line[i] != '$' && cmd_line[i] != '?' && ft_isspace(cmd_line[i]) == 0)
+	while (cmd_line[i] != 0 && cmd_line[i] != '\"' && cmd_line[i] != '\'' && cmd_line[i] != '='
 		&& cmd_line[i] != '$' && cmd_line[i] != '?' && ft_isspace(cmd_line[i]) == 0)
 	{
 		key = str_append_char(key, cmd_line[i++]);

@@ -1,6 +1,7 @@
 #include "minishell.h"
 
-// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||, *) / fork 언제 ㅎ
+// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||, *) / fork 언제 ㅎ / exit, export 에러처리
+// fprintf 변경 / fork 및 malloc 가드 / 메모리 누수 / norm3
 
 void	sort_envp_idx(t_envp *envp);
 int	file_or_directory(char *arg);
@@ -20,20 +21,19 @@ int		get_arg_size(char **arg)
 void	sigint_handler(int signo)
 {
 	int	end = ft_strlen(rl_line_buffer);
-	char temp[end + 2];
 
-	for (int i = 0; i < end; i++)
-		temp[i] = rl_line_buffer[i];
-	temp[end] = ' ';
-	temp[end + 1] = ' ';
-	temp[end + 2] = 0;
-	rl_replace_line(temp, 0);
+	rl_replace_line("", 0);	// rl_buffer 빈문자열로 초기화 (문자 읽던 도중 ^C 했을 때 필요)
 	rl_on_new_line();
 	rl_redisplay();
-	printf("\n");
-	rl_replace_line("", 0);
+	printf("  \b\b\n");	//^C 지우기, 개행해주고 새로운 프롬프트 디스플레이 필요
+	// printf("\n");
 	rl_on_new_line();
 	rl_redisplay();
+	// printf("\n");
+
+	// cat : redisplay -> on_newline -> \b\b\n
+	//		redisplay -> \b\b\n -> on_newline
+	//		\b\b\n -> redisplay -> on_newline
 }
 
 void	sigquit_handler(int signo)
@@ -132,36 +132,60 @@ void	without_eq(char **arg_arr, t_envp *envp, int i)
 	if (envp->envp_list[j] == 0)
 		envp_add(envp, arg_arr[i]);
 }
-// int	export_validation(arg_arr[i])
-// {
-// 	if (/* condition */)
-// 	{
-// 		/* code */
-// 	}
-// 	else
-// 	{
-		
-// 	}
-	
-// }
+
+int	env_validation(char *name)
+{
+	if (!((*name == '_') || ft_isalpha(*name)))
+		return (-1);
+	while(*(++name))
+	{
+		if (!(ft_isdigit(*name) || ft_isalpha(*name) || *name == '_'))
+			return (-1);
+	}
+	return (0);
+}
+
+int	export_without_arg(char **arg_arr)
+{
+	int size;
+	int i;
+
+	size = get_arg_size(arg_arr);
+	i = 0;
+	while (++i < size)
+	{
+		if (ft_strlen(arg_arr[i]) > 0)
+			return (0);
+	}
+	return (1);
+}
+
 int		mini_export(char **arg_arr, t_envp *envp)
 {
 	int	i;
+	int ret;
 	// int	j;
 	// int	key_last;
 	// int	input_key_last;
 
-	i = 1;
-	if (get_arg_size(arg_arr) == 1) // print
+	if (export_without_arg(arg_arr)) // print
 	{
 		print_export(envp);
 		return (0);
 	}
+	ret = 0;
+	i = 1;
 	while (arg_arr[i])
 	{//에러처리?
-		// if (export_validation(arg_arr[i]) == -1)
-		// 	fprintf(stderr, "bash: export: `%s': not a valid identifier", arg_arr[i]);
-		if (get_equal_idx(arg_arr[i]) > 0) // = 이 있는 인자가 들어옴
+		if (env_validation(arg_arr[i]) == -1)
+		{
+			if (ft_strlen(arg_arr[i]) > 0)
+			{
+				fprintf(stderr, "bash: export: `%s': not a valid identifier\n", arg_arr[i]);
+				ret = 1;
+			}
+		}
+		else if (get_equal_idx(arg_arr[i]) > 0) // = 이 있는 인자가 들어옴
 		{
 			with_eq(arg_arr, envp, i);
 			// input_key_last = get_equal_idx(arg_arr[i]);
@@ -201,21 +225,18 @@ int		mini_export(char **arg_arr, t_envp *envp)
 		i++;
 	}
 	sort_envp_idx(envp);
-	return (0);
+	return (ret);
 }
 
 int mini_pwd(char **arg, t_envp *envp)
 {
-	pid_t	pid;
+	char	*pwd;
 	int		status;
 
-	pid = fork();
-	wait(&status);
-	if (pid == 0)
-		execve("/bin/pwd", arg, envp->envp_list);
-	else
-		return (status);
-	return (1);
+	pwd = getcwd(NULL, 0);
+	printf("%s\n", pwd);
+	free(pwd);
+	return (0);
 }
 
 int mini_env(char **arg, t_envp *envp)
@@ -252,29 +273,49 @@ int mini_cd(char **arg, t_envp *envp) //envp 추가!
 {
 	pid_t	pid;
 	int		status;
+	int		ret;
+	char	**pwd;
 
-	if (chdir(arg[1]) != -1)
+	ret = 0;
+	if (arg[1] == 0)
+		ret = chdir(get_value("HOME", envp->envp_list));
+	else
+		ret = chdir(arg[1]);
+	if (ret != -1)
 	{
-		char **pwd = get_env_ptr("PWD", envp->envp_list);
+		pwd = get_env_ptr("PWD", envp->envp_list);
 		char *buf = getcwd(NULL, 0);
 		free(*pwd);
 		*pwd = ft_strjoin("PWD=", buf);
 		free(buf);
-		return (1);
+		return (0);
 	}
-	return (-1);
+	else if (arg[1] == 0)
+		file_or_directory(get_value("HOME", envp->envp_list));
+	else
+		file_or_directory(arg[1]);
+	return (1);
 }
 
-int mini_exit(char **arg_arr, t_envp *envp)
+int mini_exit(char **arg_arr, t_envp *envp, bool is_parent)
 {
 	int ret;
 	int error;
 
 	error = 0;
 	if (arg_arr == 0 || arg_arr[1] == 0)
-		ret = envp->last_status;
+	{
+		if (is_parent == true)
+			ret = envp->last_status;
+		else
+			ret = 0;
+	}
 	else
 		error = ft_atoi(arg_arr[1], &ret);
+	if (is_parent == true)
+	{
+		write(2, "exit\n", 5);
+	}
 	if (error == -1)
 	{
 		fprintf(stderr, "bash: exit: %s: numeric argument required\n", arg_arr[1]);
@@ -284,10 +325,6 @@ int mini_exit(char **arg_arr, t_envp *envp)
 	{
 		fprintf(stderr, "bash: exit: too many arguments\n");
 		ret = 1;
-	}
-	else
-	{
-		fprintf(stderr, "exit\n");
 	}
 	exit (((int)(char)(ret)));
 }
@@ -332,16 +369,22 @@ int mini_unset(char **arg, t_envp *envp)
 	int	i;
 	int	j;
 	int	flag;
+	int ret;
 
+	ret = 0;
 	size = get_arg_size(arg);
 	if (size == 1)
-		return (1);
+		return (0);
 	i = 0;
 	while (++i < size)
 	{
-		if (get_equal_idx(arg[i]) != -1)
+		if (get_equal_idx(arg[i]) != -1 || env_validation(arg[i]) == -1)
 		{
-			printf("bash: unset: `%s': not a valid identifier\n", arg[i]);
+			if (ft_strlen(arg[i]) > 0)
+			{
+				fprintf(stderr, "bash: unset: `%s': not a valid identifier\n", arg[i]);
+				ret = 1;
+			}
 			continue ;
 		}
 		j = -1;
@@ -373,7 +416,7 @@ int mini_unset(char **arg, t_envp *envp)
 		}
 	}
 	sort_envp_idx(envp);
-	return (0);
+	return (ret);
 }
 
 int mini_status(char **arg_arr, t_envp *envp)
@@ -650,27 +693,71 @@ int	is_not_builtin(char **arg_arr)
 
 
 
+// void	check_quote(char *line, t_quote *quote)
+// {
+// 	int	idx;
+
+// 	idx = -1;
+// 	while (++idx < ft_strlen(line))
+// 	{
+// 		if (line[idx] == '\'' && quote->q_double == 1)
+// 		{
+// 			quote->q_single *= -1;
+// 			quote->q_single_index = idx;
+// 		}
+// 		else if (line[idx] == '\"' && quote->q_single == 1)
+// 		{
+// 			quote->q_double *= -1;
+// 			quote->q_double_index = idx;
+// 		}
+// 	}
+// 	if (quote->q_single != -1)
+// 		quote->q_single_index = -1;
+// 	if (quote->q_double != -1)
+// 		quote->q_double_index = -1;
+// }
+
+int		is_remain_quote(char *line, int idx, char quote)
+{
+	while (line[++idx])
+	{
+		if (line[idx] == quote)
+			return (idx);
+	}
+	return (-1);
+}
+
 void	check_quote(char *line, t_quote *quote)
 {
 	int	idx;
+	int remain_single_quote;
+	int remain_double_quote;
 
 	idx = -1;
+	remain_single_quote = -42; // 초기화
+	remain_double_quote = -42; // 초기화
 	while (++idx < ft_strlen(line))
 	{
-		if (line[idx] == '\'' && quote->q_double == 1)
+		if (line[idx] == '\'' && (quote->q_double == 1
+			|| (quote->q_double != 1 && remain_double_quote == -1))) // 만약 "가 닫혀있거나, 열려있는데 닫힐일이 없다면 ' 처리
 		{
 			quote->q_single *= -1;
 			quote->q_single_index = idx;
+			if (quote->q_single == -1) // 따옴표가 열리면 닫히는 곳이 있는지 탐색, 닫히는 곳 없으면 -1 저장
+				remain_single_quote = is_remain_quote(line, idx, '\'');
 		}
-		else if (line[idx] == '\"' && quote->q_single == 1)
+		else if (line[idx] == '\"' && (quote->q_single == 1
+			|| (quote->q_single != 1 && remain_single_quote == -1)))
 		{
 			quote->q_double *= -1;
 			quote->q_double_index = idx;
+			if (quote->q_double == -1) // 따옴표가 열리면 닫히는 곳이 있는지 탐색, 닫히는 곳 없으면 -1 저장
+				remain_double_quote = is_remain_quote(line, idx, '\"');
 		}
 	}
-	if (quote->q_single != -1)
+	if (quote->q_single == 1) // 질 닫혀있으면 -1로 변경
 		quote->q_single_index = -1;
-	if (quote->q_double != -1)
+	if (quote->q_double == 1)
 		quote->q_double_index = -1;
 }
 
@@ -867,7 +954,9 @@ int	interpret(char **arg_arr, t_envp *envp, int *fd) // envp인자 구조체로 
 	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
 		return (mini_unset(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
-		return (mini_exit(arg_arr, envp));
+		return (mini_exit(arg_arr, envp, false));
+	if (ft_strncmp(arg_arr[0], "pwd", 4) == 0)
+		return (mini_pwd(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
 		return (mini_status(arg_arr, envp));
 	if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
@@ -893,7 +982,9 @@ int	interpret2(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸�
 	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
 		return (mini_unset(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
-		return (mini_exit(arg_arr, envp));
+		return (mini_exit(arg_arr, envp, true));
+	if (ft_strncmp(arg_arr[0], "pwd", 4) == 0)
+		return (mini_pwd(arg_arr, envp));
 	// if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
 	// 	return (mini_status(arg_arr, envp));
 	if (fork() == 0)
@@ -1113,6 +1204,6 @@ int	main(int argc, char **argv, char **first_envp)
 		// ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
 	}
 	free(line_prompt[1]);
-	mini_exit(0, &envp);
+	mini_exit(0, &envp, true);
 	return (0);
 }
