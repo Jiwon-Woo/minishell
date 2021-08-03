@@ -1,7 +1,11 @@
 #include "minishell.h"
 
-// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||, *) / fork 언제 ㅎ / exit, export 에러처리
+// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||, *)
 // fprintf 변경 / fork 및 malloc 가드 / 메모리 누수 / norm3
+// 부모 자식간 시그널, << 이것도 자식 프로세스에서 돌리기?,
+// 부모 : 컨트롤 c 하면 errno 1 /자식 :  cat << 하고 컨트롤 c하면 errno 130, cat 하고 컨트롤 \ 하면 errno 131
+// 전역변수 -> last_status
+
 
 void	sort_envp_idx(t_envp *envp);
 int	file_or_directory(char *arg);
@@ -18,14 +22,23 @@ int		get_arg_size(char **arg)
 	return (size);
 }
 
+void	child_sigquit_handler(int signo)
+{
+	if (signo == SIGINT)
+		fprintf(stderr, "\n");
+	if (signo == SIGQUIT)
+		fprintf(stderr, "Quit: 3\n");
+	// signal(SIGQUIT, SIG_DFL);
+}
+
 void	sigint_handler(int signo)
 {
 	int	end = ft_strlen(rl_line_buffer);
 
-	rl_replace_line("", 0);	// rl_buffer 빈문자열로 초기화 (문자 읽던 도중 ^C 했을 때 필요)
 	rl_on_new_line();
 	rl_redisplay();
 	printf("  \b\b\n");	//^C 지우기, 개행해주고 새로운 프롬프트 디스플레이 필요
+	rl_replace_line("", 0);	// rl_buffer 빈문자열로 초기화 (문자 읽던 도중 ^C 했을 때 필요)
 	// printf("\n");
 	rl_on_new_line();
 	rl_redisplay();
@@ -36,10 +49,10 @@ void	sigint_handler(int signo)
 	//		\b\b\n -> redisplay -> on_newline
 }
 
-void	sigquit_handler(int signo)
-{
-	exit(0);
-}
+// void	sigquit_handler(int signo)
+// {
+// 	exit(0);
+// }
 
 void	envp_add(t_envp *envp_, char *content)
 {
@@ -135,12 +148,19 @@ void	without_eq(char **arg_arr, t_envp *envp, int i)
 
 int	env_validation(char *name)
 {
-	if (!((*name == '_') || ft_isalpha(*name)))
+	int i;
+
+	i = 0;
+	if (!name)
 		return (-1);
-	while(*(++name))
+	if (!((name[i] == '_') || ft_isalpha(name[i])))
+		return (-1);
+	i++;
+	while(name[i] && name[i] != '=')
 	{
-		if (!(ft_isdigit(*name) || ft_isalpha(*name) || *name == '_'))
+		if (!(ft_isdigit(name[i]) || ft_isalpha(name[i]) || name[i] == '_'))
 			return (-1);
+		i++;
 	}
 	return (0);
 }
@@ -966,6 +986,20 @@ int	interpret(char **arg_arr, t_envp *envp, int *fd) // envp인자 구조체로 
 	return (127);
 }
 
+void	sigquit_handler(int signo)
+{
+	if (signo == SIGINT)
+	{
+		signal(SIGINT, sigquit_handler);
+		exit (130);
+	}
+	if (signo == SIGQUIT)
+	{
+		signal(SIGQUIT, sigquit_handler);
+		exit (131);
+	}
+}
+
 int	interpret2(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸기 & 절대경로로 실행할 수 있는 명령어 : echo ls env pwd
 {
 	int		status;
@@ -986,9 +1020,14 @@ int	interpret2(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸�
 	if (ft_strncmp(arg_arr[0], "pwd", 4) == 0)
 		return (mini_pwd(arg_arr, envp));
 	// if (ft_strncmp(arg_arr[0], "$?", 3) == 0)
-	// 	return (mini_status(arg_arr, envp));
+	// return (mini_status(arg_arr, envp));
+	// signal(SIGINT, child_sigquit_handler);
+	// signal(SIGQUIT, child_sigquit_handler);
+	int p = 0;
 	if (fork() == 0)
 	{
+		signal(SIGINT, SIG_IGN);
+		signal(SIGQUIT, SIG_IGN);
 		if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
 			exit (with_path(arg_arr, envp));
 		else if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
@@ -996,7 +1035,13 @@ int	interpret2(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸�
 	}
 	else
 	{
+		// signal(SIGINT, //만약 SIG_INT 받으면 -> 자식 프로세스 KILL하고 , QUIT 출력 , last_status 130으로 업데이트 
+		//만약 SIG_QUIT 받으면 -> 자식 프로세스 KILL하고 , QUIT 출력 , last_status 131로 업데이트
+		signal(SIGINT, child_sigquit_handler);
+		signal(SIGQUIT, child_sigquit_handler);
 		wait(&(envp->last_status));
+		signal(SIGINT, sigint_handler);
+		signal(SIGQUIT, SIG_IGN);
 		envp->last_status = WEXITSTATUS(envp->last_status);
 		return (envp->last_status);
 	}
@@ -1007,7 +1052,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 {
 	char **arg_arr;
 
-	// set_signal();
+	set_signal();
 	add_history(line_prompt[0]);
 	check_quote(line_prompt[0], quote);
 	arg_cmd_tmp[0] = get_arg_list(line_prompt[0], *quote);//t_list **arg_cmd_tmp
@@ -1088,7 +1133,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 					{
 						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
 					}
-					char *store = ft_strdup(rl_line_buffer);
+					// char *store = ft_strdup(rl_line_buffer);
 					char *line = readline("> ");
 					while (line != NULL && ft_strncmp(line, redirect_cmd[0], ft_strlen(redirect_cmd[0]) + 1) != 0)
 					{
@@ -1096,7 +1141,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 						write(fds[idx - 1][1], "\n", 1);
 						line = readline("> ");
 					}
-					rl_line_buffer = store;
+					// rl_line_buffer = store;
 					close(fds[idx - 1][1]);
 					fd[0] = fds[idx - 1][0];
 					// close(fds[idx - 1][0]);

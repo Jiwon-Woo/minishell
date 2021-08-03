@@ -13,6 +13,7 @@
 # include <errno.h>
 # include <string.h>
 # include <stdbool.h>
+# include <signal.h>
 # include "libft/libft.h"
 
 # define NONE 0
