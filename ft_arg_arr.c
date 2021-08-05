@@ -103,7 +103,7 @@ int find_env_in_double_quote(char **ret, char *cmd_line, int i, t_envp *envp)
 		if (cmd_line[i] == '$')
 			key = ft_strdup("$");
 		else
-			*ret = ft_strjoin_with_free(*ret, ft_itoa(envp->last_status));
+			*ret = ft_strjoin_with_free(*ret, ft_itoa(g_status));
 		i++;
 	}
 	else
@@ -137,7 +137,7 @@ int find_env_without_quote(char **ret, char *cmd_line, int i, t_envp *envp)
 		if (cmd_line[i] == '$')
 			key = ft_strdup("$");
 		else
-			*ret = ft_strjoin_with_free(*ret, ft_itoa(envp->last_status));
+			*ret = ft_strjoin_with_free(*ret, ft_itoa(g_status));
 		i++;
 	}
 	else

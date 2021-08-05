@@ -25,6 +25,8 @@
 # define AND 6
 # define OR 7
 
+int g_status;
+
 typedef	struct s_quote
 {
 	int	q_single;
@@ -37,7 +39,6 @@ typedef	struct s_envp
 {
 	char	**envp_list;
 	int		*sort_idx;
-	int		last_status;
 }	t_envp;
 
 int		factor_num(char *s);

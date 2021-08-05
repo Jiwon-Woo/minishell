@@ -1,10 +1,8 @@
 #include "minishell.h"
 
-// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||, *)
+// 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||)
 // fprintf 변경 / fork 및 malloc 가드 / 메모리 누수 / norm3
-// 부모 자식간 시그널, << 이것도 자식 프로세스에서 돌리기?,
-// 부모 : 컨트롤 c 하면 errno 1 /자식 :  cat << 하고 컨트롤 c하면 errno 130, cat 하고 컨트롤 \ 하면 errno 131
-// 전역변수 -> last_status
+
 
 
 void	sort_envp_idx(t_envp *envp);
@@ -22,15 +20,6 @@ int		get_arg_size(char **arg)
 	return (size);
 }
 
-void	child_sigquit_handler(int signo)
-{
-	if (signo == SIGINT)
-		fprintf(stderr, "\n");
-	if (signo == SIGQUIT)
-		fprintf(stderr, "Quit: 3\n");
-	// signal(SIGQUIT, SIG_DFL);
-}
-
 void	sigint_handler(int signo)
 {
 	int	end = ft_strlen(rl_line_buffer);
@@ -42,12 +31,46 @@ void	sigint_handler(int signo)
 	// printf("\n");
 	rl_on_new_line();
 	rl_redisplay();
+	g_status = 1;
+	signal(SIGINT, (void *)sigint_handler);
 	// printf("\n");
-
-	// cat : redisplay -> on_newline -> \b\b\n
-	//		redisplay -> \b\b\n -> on_newline
-	//		\b\b\n -> redisplay -> on_newline
 }
+
+void	child_sigquit_handler(int signo)
+{
+	if (signo == SIGINT)
+	{
+		printf("\n");
+		g_status = 130;
+	}
+	if (signo == SIGQUIT)
+	{
+		printf("Quit: 3\n");
+		g_status = 131;
+	}
+}
+
+void	child_sigint_handler(int signo)
+{
+	if (signo == SIGINT)
+	{
+		printf("\n");
+		g_status = 130;
+	}
+	signal(SIGINT, (void *)sigint_handler);
+}
+
+void	redirect_sigint_handler(int signo)
+{
+	printf("\n");
+	g_status = 1;
+	signal(SIGINT, (void *)sigint_handler);
+}
+
+// cat : redisplay -> on_newline -> \b\b\n
+//		redisplay -> \b\b\n -> on_newline
+//		\b\b\n -> redisplay -> on_newline
+
 
 // void	sigquit_handler(int signo)
 // {
@@ -326,7 +349,7 @@ int mini_exit(char **arg_arr, t_envp *envp, bool is_parent)
 	if (arg_arr == 0 || arg_arr[1] == 0)
 	{
 		if (is_parent == true)
-			ret = envp->last_status;
+			ret = g_status;
 		else
 			ret = 0;
 	}
@@ -445,7 +468,7 @@ int mini_status(char **arg_arr, t_envp *envp)
 
 	//bash: 127: command not found
 	write(2, "bash: ", ft_strlen("bash: "));
-	status = ft_itoa(envp->last_status);
+	status = ft_itoa(g_status);
 	write(2, status, ft_strlen(status));
 	free(status);
 	write(2, ": command not found\n", ft_strlen(": command not found\n"));
@@ -945,7 +968,6 @@ char **append_strarr(char **str1, char **str2)
 	int 	idx;
 	int		i;
 
-	
 	ret_strarr = (char **)malloc(sizeof(char *) * (get_arg_size(str1) + get_arg_size(str2) + 1));
 	i = 0;
 	idx = 0;
@@ -991,12 +1013,12 @@ void	sigquit_handler(int signo)
 	if (signo == SIGINT)
 	{
 		signal(SIGINT, sigquit_handler);
-		exit (130);
+		g_status = 130;
 	}
 	if (signo == SIGQUIT)
 	{
 		signal(SIGQUIT, sigquit_handler);
-		exit (131);
+		g_status = 131;
 	}
 }
 
@@ -1026,8 +1048,8 @@ int	interpret2(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸�
 	int p = 0;
 	if (fork() == 0)
 	{
-		signal(SIGINT, SIG_IGN);
-		signal(SIGQUIT, SIG_IGN);
+		// signal(SIGINT, SIG_IGN);
+		signal(SIGQUIT, SIG_DFL);
 		if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
 			exit (with_path(arg_arr, envp));
 		else if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
@@ -1039,11 +1061,14 @@ int	interpret2(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸�
 		//만약 SIG_QUIT 받으면 -> 자식 프로세스 KILL하고 , QUIT 출력 , last_status 131로 업데이트
 		signal(SIGINT, child_sigquit_handler);
 		signal(SIGQUIT, child_sigquit_handler);
-		wait(&(envp->last_status));
+		// wait(&(g_status));
+		int sig_get;
+		wait(&sig_get);
+		if (!WIFSIGNALED(sig_get))
+			g_status = WEXITSTATUS(sig_get);
 		signal(SIGINT, sigint_handler);
 		signal(SIGQUIT, SIG_IGN);
-		envp->last_status = WEXITSTATUS(envp->last_status);
-		return (envp->last_status);
+		return (g_status);
 	}
 	return (127);
 }
@@ -1066,7 +1091,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 
 	// if (size == 1 && ft_strncmp(((char **)(arg_cmd_tmp[1]->content))[0], "exit", 5) == 0)
 	// {
-	// 	envp->last_status =  mini_exit((char **)(arg_cmd_tmp[1]->content), envp);
+	// 	g_status =  mini_exit((char **)(arg_cmd_tmp[1]->content), envp);
 	// 	return;
 	// }
 	while (arg_cmd_tmp[1])
@@ -1133,30 +1158,70 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 					{
 						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
 					}
-					// char *store = ft_strdup(rl_line_buffer);
+					/*
+					g_status = 0;
 					char *line = readline("> ");
+					if (g_status == 1)
+					{	
+						rl_replace_line(0, 0);
+						printf("g_status change1\n");
+						return ;
+					}
 					while (line != NULL && ft_strncmp(line, redirect_cmd[0], ft_strlen(redirect_cmd[0]) + 1) != 0)
 					{
 						write(fds[idx - 1][1], line, ft_strlen(line));
 						write(fds[idx - 1][1], "\n", 1);
 						line = readline("> ");
+						if (g_status == 1)
+						{	
+							rl_replace_line(0, 0);
+							printf("g_status change2\n");
+							return ;
+						}
 					}
-					// rl_line_buffer = store;
 					close(fds[idx - 1][1]);
 					fd[0] = fds[idx - 1][0];
 					// close(fds[idx - 1][0]);
+					*/
+					if (fork() == 0)
+					{
+						signal(SIGINT, SIG_DFL);
+						char *line = readline("> ");
+						while (line != NULL && ft_strncmp(line, redirect_cmd[0], ft_strlen(redirect_cmd[0]) + 1) != 0)
+						{
+							write(fds[idx - 1][1], line, ft_strlen(line));
+							write(fds[idx - 1][1], "\n", 1);
+							line = readline("> ");
+						}
+						exit(0);
+					}
+					else
+					{
+						signal(SIGINT, redirect_sigint_handler);
+						close(fds[idx - 1][1]);
+						fd[0] = fds[idx - 1][0];
+						int sig_get;
+						wait(&sig_get);
+						if (WIFSIGNALED(sig_get))
+						{
+							if (WTERMSIG(sig_get) == 2)
+								return;
+						}
+						g_status = WEXITSTATUS(sig_get);
+						set_signal();
+					}
 				}
 			}
 			if (is_redirection(arg_cmd_tmp[1]->next_flag) == 1 && arg_cmd_tmp[1]->next == 0)
 			{
 				fprintf(stderr, "bash: syntax error near unexpected token `newline'\n");
-				envp->last_status = 258;
+				g_status = 258;
 				return;
 			}
 			if (error_file != 0)
 			{
 				fprintf(stderr, "bash: %s: No such file or directory\n", error_file);
-				envp->last_status = 1;
+				g_status = 1;
 				return;
 			}
 		}
@@ -1167,7 +1232,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 			if (arg_cmd_tmp[1]->next_flag == PIPE && ((char **)(current_cmd->content))[0] == 0)
 			{
 				fprintf(stderr, "bash: syntax error near unexpected token `|'\n");
-				envp->last_status = 258;
+				g_status = 258;
 				return;
 			}
 			else if (arg_cmd_tmp[1]->next_flag == PIPE && fd[1] == -1)
@@ -1178,15 +1243,41 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 					dup2(fd[0], 0);
 				if (fd[1] != -1)
 					dup2(fd[1], 1);
+				signal(SIGQUIT, SIG_DFL);
 				exit (interpret(copy_cmd, envp, fd));
 			}
 			else
 			{
-				wait(&(envp->last_status));
-				envp->last_status = WEXITSTATUS(envp->last_status);
+				signal(SIGINT, child_sigquit_handler);
+				signal(SIGQUIT, child_sigquit_handler);
+				int sig_get;
+				wait(&sig_get);
+				if (!WIFSIGNALED(sig_get))
+					g_status = WEXITSTATUS(sig_get);
+				set_signal();
 				close(fd[0]);
 				close(fd[1]);
 			}
+			// if (fork() == 0)
+			// {
+			// 	signal(SIGQUIT, SIG_DFL);
+			// 	if (last_slash != -1) // 명령어에 절대경로가 주어졌을 때
+			// 		exit (with_path(arg_arr, envp));
+			// 	else if (last_slash == -1) // 인자가 경로로 주어지지 않을 때
+			// 		exit (without_path(arg_arr, envp));
+			// }
+			// else
+			// {
+			// 	signal(SIGINT, child_sigquit_handler);
+			// 	signal(SIGQUIT, child_sigquit_handler);
+			// 	int sig_get;
+			// 	wait(&sig_get);
+			// 	if (!WIFSIGNALED(sig_get))
+			// 		g_status = WEXITSTATUS(sig_get);
+			// 	signal(SIGINT, sigint_handler);
+			// 	signal(SIGQUIT, SIG_IGN);
+			// 	return (g_status);
+			// }
 		}
 		else
 		{
@@ -1198,7 +1289,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 				dup2(fd[0], 0);
 			if (fd[1] != -1)
 				dup2(fd[1], 1);
-			envp->last_status = interpret2(copy_cmd, envp);
+			g_status = interpret2(copy_cmd, envp);
 			dup2(backup[0], 0);
 			dup2(backup[1], 1);
 			close(backup[0]);
@@ -1208,7 +1299,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 		}
 		// else if (ft_strncmp(((char **)(current_cmd->content))[0], "exit", 5) == 0)
 		// {
-		// 	envp->last_status =  mini_exit((char **)(arg_cmd_tmp[1]->content), envp);
+		// 	g_status =  mini_exit((char **)(arg_cmd_tmp[1]->content), envp);
 		// 	return;
 		// }s
 		arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
@@ -1233,6 +1324,7 @@ int	main(int argc, char **argv, char **first_envp)
 
 	init_quote(&quote);
 	init_envp(&envp, first_envp);
+	g_status = 0;
 	set_signal();
 	line_prompt = (char **)malloc(sizeof(char *) * 2);
 	arg_cmd_tmp = (t_list **)malloc(sizeof(t_list *) * 3);
