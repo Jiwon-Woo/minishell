@@ -90,7 +90,7 @@ int find_env_in_double_quote(char **ret, char *cmd_line, int i, t_envp *envp)
 	char	*key;
 	t_quote quote;
 
-	check_single_in_double(cmd_line, i, &quote);
+	// check_single_in_double(cmd_line, i, &quote);
 	key = 0;
 	while (cmd_line[i] != 0 && ft_isspace(cmd_line[i]) == 0
 		&& cmd_line[i] != '$' && cmd_line[i] != '?' && cmd_line[i] != '='
@@ -119,10 +119,10 @@ int find_env_in_double_quote(char **ret, char *cmd_line, int i, t_envp *envp)
 int find_env_without_quote(char **ret, char *cmd_line, int i, t_envp *envp)
 {
 	char	*key;
-	t_quote	quote;
+	// t_quote	quote;
 
-	init_quote(&quote);
-	check_quote(cmd_line, &quote);
+	// init_quote(&quote);
+	// check_quote(cmd_line, &quote);
 	key = 0;
 	// while (cmd_line[i] != 0 && (!(cmd_line[i] == '\"' && i != quote.q_double_index)
 	// 	&& !(cmd_line[i] == '\'' && i != quote.q_single_index)) && cmd_line[i] != '='

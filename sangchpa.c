@@ -1,49 +1,25 @@
-#include <unistd.h>
-#include <sys/wait.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-
-SIGQUIT, SIGINT => exec은 무조건 죽음 => SIGCHLD 발생?
-signal(SIGCHLD, child_handler); => 개행이나 QUIT 출력?
-signal(SIGINT, signal_handler);
-signal(SIGQUIT, signal_handler);
-
-
-
-void	signal_handler(int signo)
-{
-	if (signo == SIGINT)
-	{
-		kill(0, SIGUSR2);
-		kill(0, SIGUSR1);
-		write(0, "\n", 1);
-	}
-	else if (signo == SIGQUIT)
-	{
-		write(1, "\r", 1);
-		kill(0, SIGCONT);
-		return ;
-	}
-	else if (signo == SIGUSR1)
-	{
-		write(1, "\n", 1);
-		exit(0);
-	}
-	else if (signo == SIGUSR2)
-	{
-		g_exit_status_code = 1;
-	}
-}
-
-void	signal_fatal_error(int signo)
-{
-	if (signo == SIGUSR1)
-	{
-		kill(0, SIGUSR2);
-	}
-	else if (signo == SIGUSR2)
-	{
-		g_exit_status_code = 130;
-	}
-}
+USER=jiwonwoo
+PATH=/Users/jiwonwoo/.rbenv/shims:/Users/jiwonwoo/.rbenv/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/jiwonwoo/.rbenv/shims:/Users/jiwonwoo/.rbenv/bin
+LOGNAME=jiwonwoo
+SSH_AUTH_SOCK=/private/tmp/com.apple.launchd.6QMDSZ5BHV/Listeners
+HOME=/Users/jiwonwoo
+SHELL=/bin/zsh
+__CF_USER_TEXT_ENCODING=0x1F5:0x3:0x33
+TMPDIR=/var/folders/_r/ly2pm46125s9hbkjhsrzrr_c0000gn/T/
+XPC_SERVICE_NAME=0
+XPC_FLAGS=0x0
+ORIGINAL_XDG_CURRENT_DESKTOP=undefined
+SHLVL=1
+PWD=/Users/jiwonwoo/Desktop/minishell
+OLDPWD=/Users/jiwonwoo/Desktop/minishell
+RBENV_SHELL=zsh
+TERM_PROGRAM=vscode
+TERM_PROGRAM_VERSION=1.58.2
+LANG=ko_KR.UTF-8
+COLORTERM=truecolor
+VSCODE_GIT_IPC_HANDLE=/var/folders/_r/ly2pm46125s9hbkjhsrzrr_c0000gn/T/vscode-git-66da11c8a5.sock
+GIT_ASKPASS=/Applications/Visual Studio Code.app/Contents/Resources/app/extensions/git/dist/askpass.sh
+VSCODE_GIT_ASKPASS_NODE=/Applications/Visual Studio Code.app/Contents/Frameworks/Code Helper (Renderer).app/Contents/MacOS/Code Helper (Renderer)
+VSCODE_GIT_ASKPASS_MAIN=/Applications/Visual Studio Code.app/Contents/Resources/app/extensions/git/dist/askpass-main.js
+TERM=xterm-256color
+_=/Users/jiwonwoo/Desktop/minishell/./minishell

@@ -3,8 +3,6 @@
 // 시그널, status 처리, 에러처리, -> 보너스?? (&& 및 ||)
 // fprintf 변경 / fork 및 malloc 가드 / 메모리 누수 / norm3
 
-
-
 void	sort_envp_idx(t_envp *envp);
 int	file_or_directory(char *arg);
 
@@ -318,10 +316,12 @@ int mini_cd(char **arg, t_envp *envp) //envp 추가!
 	int		status;
 	int		ret;
 	char	**pwd;
+	char	*home;
 
 	ret = 0;
+	home = get_value("HOME", envp->envp_list);
 	if (arg[1] == 0)
-		ret = chdir(get_value("HOME", envp->envp_list));
+		ret = chdir(home);
 	else
 		ret = chdir(arg[1]);
 	if (ret != -1)
@@ -331,12 +331,14 @@ int mini_cd(char **arg, t_envp *envp) //envp 추가!
 		free(*pwd);
 		*pwd = ft_strjoin("PWD=", buf);
 		free(buf);
+		free(home);
 		return (0);
 	}
 	else if (arg[1] == 0)
-		file_or_directory(get_value("HOME", envp->envp_list));
+		file_or_directory(home);
 	else
 		file_or_directory(arg[1]);
+	free(home);
 	return (1);
 }
 
@@ -516,15 +518,16 @@ int	file_or_directory(char *arg)
 		last_slash = 1;
 	slash = ft_split(arg, '/');
 	if (first_slash == 1)
-		path = ft_strjoin(path, "/");
-	path = ft_strjoin(path, slash[0]);
+		path = ft_strjoin_with_free(path, ft_strdup("/"));
+	path = ft_strjoin_with_free(path, ft_strdup(slash[0]));
 	while ((type = get_file_type(path)) > 0 && slash[++i]) // 디렉토리 다 스킵
 	{
 		// printf("%s : %d\n", path, type);
-		path = ft_strjoin(path, "/");
-		path = ft_strjoin(path, slash[i]);
+		path = ft_strjoin_with_free(path, ft_strdup("/"));
+		path = ft_strjoin_with_free(path, ft_strdup(slash[i]));
 		// type = get_file_type(path);
 	}
+	free(path);
 	if (type == 0 && slash[i + 1] == 0)
 		i++;
 	// write(2, strerror(errno), ft_strlen(strerror(errno)));
@@ -532,18 +535,21 @@ int	file_or_directory(char *arg)
 	if ((slash[i] != 0 && type == 0) || (slash[i] == 0 && type == 0 && last_slash == 1))
 	{
 		fprintf(stderr, "bash: %s: Not a directory\n", arg);
+		free_two_dimension(slash);
 		return (126);
 		// exit(20);
 	}
 	else if (type == -1)
 	{
 		fprintf(stderr, "bash: %s: No such file or directory\n", arg);
+		free_two_dimension(slash);
 		return (127);
 		// exit(2);
 	}
 	else if (slash[i] == 0 && type == 1)
 	{
 		fprintf(stderr, "bash: %s: is a directory\n", arg);
+		free_two_dimension(slash);
 		return(126);
 		// exit(21);
 	}
@@ -776,6 +782,7 @@ void	check_quote(char *line, t_quote *quote)
 	int remain_single_quote;
 	int remain_double_quote;
 
+	init_quote(quote);
 	idx = -1;
 	remain_single_quote = -42; // 초기화
 	remain_double_quote = -42; // 초기화
@@ -839,7 +846,7 @@ void invalid_quote(char **arg, char *line, t_quote *quote, int *i)
 		*arg = str_append_char(*arg, line[(*i)++]);
 }
 
-t_list	*get_arg_list(char *line, t_quote quote)
+t_list	*get_arg_list(char *line, t_quote *quote)
 {
 	t_list 	*arg_list;
 	char	*arg;
@@ -854,8 +861,8 @@ t_list	*get_arg_list(char *line, t_quote quote)
 			i++;
 		while (line[i])
 		{
-			if (valid_quote(&arg, line, &quote, &i) == 0)
-				invalid_quote(&arg, line, &quote, &i);
+			if (valid_quote(&arg, line, quote, &i) == 0)
+				invalid_quote(&arg, line, quote, &i);
 			if (ft_isspace(line[i]) == 1 || line[i] == 0)
 				break ;
 		}
@@ -933,6 +940,7 @@ void	init_envp(t_envp *envp, char **first_envp)
 		envp->envp_list[i] = ft_strdup(first_envp[i]);
 	envp->envp_list[size] = 0;
 	sort_envp_idx(envp);
+	// free_two_dimension(first_envp);
 }
 
 void set_signal()
@@ -1073,14 +1081,15 @@ int	interpret2(char **arg_arr, t_envp *envp) // envp인자 구조체로 바꾸�
 	return (127);
 }
 
-void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_envp *envp)
+void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_envp *envp)
 {
 	char **arg_arr;
+	t_quote quote;
 
 	set_signal();
 	add_history(line_prompt[0]);
-	check_quote(line_prompt[0], quote);
-	arg_cmd_tmp[0] = get_arg_list(line_prompt[0], *quote);//t_list **arg_cmd_tmp
+	check_quote(line_prompt[0], &quote);
+	arg_cmd_tmp[0] = get_arg_list(line_prompt[0], &quote);//t_list **arg_cmd_tmp
 	arg_cmd_tmp[1] = list_to_char_arr(arg_cmd_tmp[0], envp);
 	arg_cmd_tmp[2] = arg_cmd_tmp[1];
 
@@ -1111,9 +1120,13 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 		fd[1] = -1;
 
 		t_list	*current_cmd = arg_cmd_tmp[1];
-		char	**copy_cmd = append_strarr((char **)(current_cmd->content), 0);
+		char	**copy_cmd = 0;
 		int		current_fds = idx;
 		char	*error_file = 0;
+
+		if (copy_cmd != 0)
+			free_two_dimension(copy_cmd);
+		copy_cmd = append_strarr((char **)(current_cmd->content), 0);
 
 		if (is_redirection(current_cmd->pre_flag) == 0 &&
 			is_redirection(arg_cmd_tmp[1]->next_flag) == 1)
@@ -1131,8 +1144,9 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 						fd[1] = open(redirect_cmd[0], O_WRONLY | O_APPEND | O_CREAT, 0644);
 					if (get_arg_size(redirect_cmd) > 1)
 					{
+						char **temp = copy_cmd;
 						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
-						// fprintf(stderr, "hihihih: %s %s\n", *(copy_cmd), *(copy_cmd + 1));
+						free_two_dimension(temp);
 					}
 				}
 				if (arg_cmd_tmp[1]->pre_flag == REDIRECT1)
@@ -1141,7 +1155,9 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 					// fprintf(stderr, "fd[0] : %d\n", fd[0]);
 					if (get_arg_size(redirect_cmd) > 1)
 					{
+						char **temp = copy_cmd;
 						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
+						free_two_dimension(temp);
 					}
 					if (fd[0] == -1)
 					{
@@ -1156,7 +1172,9 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 				{
 					if (get_arg_size(redirect_cmd) > 1)
 					{
+						char **temp = copy_cmd;
 						copy_cmd = append_strarr(copy_cmd, redirect_cmd + 1);
+						free_two_dimension(temp);
 					}
 					/*
 					g_status = 0;
@@ -1191,6 +1209,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 						{
 							write(fds[idx - 1][1], line, ft_strlen(line));
 							write(fds[idx - 1][1], "\n", 1);
+							free(line);
 							line = readline("> ");
 						}
 						exit(0);
@@ -1205,7 +1224,16 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 						if (WIFSIGNALED(sig_get))
 						{
 							if (WTERMSIG(sig_get) == 2)
+							{
+								arg_cmd_tmp[1] = arg_cmd_tmp[2];
+								ft_lstclear(&arg_cmd_tmp[0], free);
+								ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
+								if (copy_cmd != 0)
+									free_two_dimension(copy_cmd);
+								if (error_file != 0)
+									free(error_file);
 								return;
+							}
 						}
 						g_status = WEXITSTATUS(sig_get);
 						set_signal();
@@ -1216,12 +1244,21 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 			{
 				fprintf(stderr, "bash: syntax error near unexpected token `newline'\n");
 				g_status = 258;
+				free_two_dimension(copy_cmd);
+				arg_cmd_tmp[1] = arg_cmd_tmp[2];
+				ft_lstclear(&arg_cmd_tmp[0], free);
+				ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
 				return;
 			}
 			if (error_file != 0)
 			{
 				fprintf(stderr, "bash: %s: No such file or directory\n", error_file);
 				g_status = 1;
+				free_two_dimension(copy_cmd);
+				free(error_file);
+				arg_cmd_tmp[1] = arg_cmd_tmp[2];
+				ft_lstclear(&arg_cmd_tmp[0], free);
+				ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
 				return;
 			}
 		}
@@ -1233,6 +1270,10 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 			{
 				fprintf(stderr, "bash: syntax error near unexpected token `|'\n");
 				g_status = 258;
+				free_two_dimension(copy_cmd);
+				arg_cmd_tmp[1] = arg_cmd_tmp[2];
+				ft_lstclear(&arg_cmd_tmp[0], free);
+				ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
 				return;
 			}
 			else if (arg_cmd_tmp[1]->next_flag == PIPE && fd[1] == -1)
@@ -1250,13 +1291,16 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 			{
 				signal(SIGINT, child_sigquit_handler);
 				signal(SIGQUIT, child_sigquit_handler);
+				close(fd[0]);
+				close(fd[1]);
 				int sig_get;
 				wait(&sig_get);
 				if (!WIFSIGNALED(sig_get))
 					g_status = WEXITSTATUS(sig_get);
+				close(fds[current_fds - 1][0]);
+				close(fds[idx][1]);
 				set_signal();
-				close(fd[0]);
-				close(fd[1]);
+				free_two_dimension(copy_cmd);
 			}
 			// if (fork() == 0)
 			// {
@@ -1290,6 +1334,7 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 			if (fd[1] != -1)
 				dup2(fd[1], 1);
 			g_status = interpret2(copy_cmd, envp);
+			free_two_dimension(copy_cmd);
 			dup2(backup[0], 0);
 			dup2(backup[1], 1);
 			close(backup[0]);
@@ -1304,11 +1349,12 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_quote *quote, t_env
 		// }s
 		arg_cmd_tmp[1] = arg_cmd_tmp[1]->next;
 	}
-	arg_cmd_tmp[1] = arg_cmd_tmp[2];
+	// ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
 	// free(line_prompt[0]);
 	// free(line_prompt[1]);
 	// line_prompt[1] = make_prompt();
 	// line_prompt[0] = readline(line_prompt[1]);
+	arg_cmd_tmp[1] = arg_cmd_tmp[2];
 	ft_lstclear(&arg_cmd_tmp[0], free);
 	ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
 }
@@ -1317,12 +1363,12 @@ int	main(int argc, char **argv, char **first_envp)
 {
 	t_list		**arg_cmd_tmp;
 	char		**line_prompt;
-	t_quote		quote;
+	// t_quote		quote;
 	t_envp		envp;
 	// int fds[2];
 	// pipe(fds);
 
-	init_quote(&quote);
+	// init_quote(&quote);
 	init_envp(&envp, first_envp);
 	g_status = 0;
 	set_signal();
@@ -1332,7 +1378,7 @@ int	main(int argc, char **argv, char **first_envp)
 	line_prompt[0] = readline(line_prompt[1]);
 	while (line_prompt[0] != NULL)
 	{
-		handle_line(line_prompt, arg_cmd_tmp, &quote, &envp);
+		handle_line(line_prompt, arg_cmd_tmp, &envp);
 		free(line_prompt[0]);
 		free(line_prompt[1]);
 		line_prompt[1] = make_prompt();

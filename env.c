@@ -19,8 +19,6 @@ char *get_value(char *key, char **envp)
 	int equal_idx;
 
 	i = -1;
-	if (key[0] == '$' && key[1] == 0)
-		return (ft_itoa(getpid()));
 	while (envp[++i])
 	{
 		equal_idx = get_equal_idx(envp[i]);

@@ -49,7 +49,7 @@ char	**ft_split_space(char *s);
 void	ft_lstclear_two(t_list **lst, void (*del)(char **));
 
 char	*str_append_char(char *str, char c);
-t_list	*get_arg_list(char *line, t_quote quote);
+t_list	*get_arg_list(char *line, t_quote *quote);
 t_list	*list_to_char_arr(t_list *arg_list, t_envp *envp);
 void	check_quote(char *line, t_quote *quote);
 void 	init_quote(t_quote *quote);
