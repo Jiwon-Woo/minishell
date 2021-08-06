@@ -1341,6 +1341,8 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_envp *envp)
 			close(backup[1]);
 			close(fd[0]);
 			close(fd[1]);
+			close(fds[current_fds - 1][0]);
+			close(fds[idx][1]);
 		}
 		// else if (ft_strncmp(((char **)(current_cmd->content))[0], "exit", 5) == 0)
 		// {
