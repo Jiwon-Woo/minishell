@@ -26,10 +26,10 @@ static char		**free_split(char **words, int num)
 	while (n <= num)
 	{
 		free(words[n]);
-		words[n] = NULL;
+		words[n] = 0;
 	}
 	free(words);
-	words = NULL;
+	words = 0;
 	return (words);
 }
 
@@ -41,7 +41,7 @@ static char		**word_len(char **words, char *s, char c)
 
 	index = 0;
 	num = 0;
-	while (index < ft_strlen(s) && words != NULL)
+	while (index < ft_strlen(s) && words != 0)
 	{
 		while (s[index] == c && index < ft_strlen(s))
 			index++;
@@ -54,7 +54,7 @@ static char		**word_len(char **words, char *s, char c)
 		if (len != 0)
 		{
 			words[num] = (char *)malloc(sizeof(char) * (len + 1));
-			if (words[num] == NULL)
+			if (words[num] == 0)
 				free_split(words, num);
 			num++;
 		}
@@ -88,7 +88,7 @@ static void		word_split(char **words, char *s, char c)
 		words[num][len] = '\0';
 		num++;
 	}
-	words[num] = NULL;
+	words[num] = 0;
 }
 
 char			**ft_split(char *s, char c)
@@ -96,14 +96,14 @@ char			**ft_split(char *s, char c)
 	char	**words;
 	int	num;
 
-	if (s == NULL)
-		return (NULL);
+	if (s == 0)
+		return (0);
 	num = word_num(s, c);
 	words = (char **)malloc(sizeof(char *) * (num + 1));
-	if (words == NULL)
-		return (NULL);
-	if (word_len(words, s, c) == NULL)
-		return (NULL);
+	if (words == 0)
+		return (0);
+	if (word_len(words, s, c) == 0)
+		exit (0);
 	word_split(words, s, c);
 	return (words);
 }

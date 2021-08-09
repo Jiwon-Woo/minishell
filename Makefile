@@ -7,13 +7,18 @@ LIBMINISHELL = -L. -lminishell
 LIBFT = -L./libft -lft
 SOURCE = ft_split_space.c \
 		ft_atoi_ret_error.c \
-		ft_arg_arr.c \
-		env.c \
 		ft_strjoin_with_free.c \
-		ft_lstclear_two.c
+		ft_lstclear_two.c \
+		ft_strjoin_two.c \
+		arg_lst_arr.c \
+		env.c \
+		signal_handler.c \
+		mini_cmd.c \
+		parse_path.c \
+		interpret.c \
+		check_quote.c
 OBJECT = $(SOURCE:.c=.o)
 MAIN = minishell.c
-# MAIN = main.c
 
 LOCAL = -I/usr/local/opt/readline/include -L/usr/local/opt/readline/lib -lreadline
 
@@ -23,12 +28,12 @@ libft :
 	@make -C ./libft all
 
 $(NAME): $(LIB) $(MAIN) libft
-#	gcc $(MAIN) $(LIBMINISHELL) $(LIBFT) $(LIBREADLINE) -o $(NAME)
-	gcc $(MAIN) $(LIBMINISHELL) $(LIBFT) $(LOCAL) -o $(NAME)
+#	gcc $(MAIN) $(CFLAGS) $(LIBMINISHELL) $(LIBFT) $(LIBREADLINE) -o $(NAME)
+	gcc $(MAIN) $(CFLAGS) $(LIBMINISHELL) $(LIBFT) $(LOCAL) -o $(NAME)
 $(LIB): $(OBJECT)
 	@ar rcs $(LIB) $(OBJECT)
 $(OBJECT): $(SOURCE)
-	@gcc -c $(SOURCE)
+	@gcc -c $(CFLAGS) $(SOURCE)
 
 clean:
 	@rm -f $(OBJECT)

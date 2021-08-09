@@ -103,15 +103,15 @@ char	**ft_split_space(char *s)
 		return (0);
 	num = factor_num(s);
 	words = (char **)malloc(sizeof(char *) * (num + 1));
-	if (words == 0)
-		return (0);
+	if (!words)
+		exit(1);
 	if (num == 0)
 	{
 		words[0] = NULL;
 		return (words);
 	}
 	if (factor_len(words, s, num) == 0)
-		return (0);
+		exit (1);
 	factor_split(words, s, num);
 	return (words);
 }

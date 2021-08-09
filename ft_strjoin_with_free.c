@@ -33,7 +33,7 @@ char	*ft_strjoin_with_free(char *s1, char *s2)
 	len2 = ft_strlen(s2);
 	str = (char *)malloc(sizeof(char) * (len1 + len2 + 1));
 	if (str == 0)
-		return (0);
+		exit (1);
 	index = 0;
 	i = 0;
 	while (i < len1)

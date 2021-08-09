@@ -37,8 +37,8 @@ char			*ft_itoa(int n)
 	len = itoa_len(n);
 	num = sign * n;
 	integer = (char *)malloc(sizeof(char) * (len + 1));
-	if (integer == NULL)
-		return (NULL);
+	if (integer == 0)
+		exit (1);
 	index = len;
 	integer[index] = 0;
 	while (--index > 0)
