@@ -18,10 +18,10 @@ void	sigint_handler(int signo)
 	signal(SIGINT, (void *)sigint_handler);
 }
 
-char *make_prompt()
+char	*make_prompt(void)
 {
-	char		*prompt;
-	char		buffer[1024];
+	char	*prompt;
+	char	buffer[1024];
 
 	getcwd(buffer, 1024);
 	prompt = ft_strjoin(buffer, "$ ");
@@ -35,30 +35,58 @@ int	is_redirection(int flag)
 	return (0);
 }
 
-int is_output_redirect(int flag)
+int	is_output_redirect(int flag)
 {
 	if (flag == REDIRECT2 || flag == REDIRECT4)
 		return (1);
 	return (0);
 }
 
-int is_input_redirect(int flag)
+int	is_input_redirect(int flag)
 {
 	if (flag == REDIRECT1 || flag == REDIRECT3)
 		return (1);
 	return (0);
 }
 
-void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_envp *envp)
+int redir_err(char *error_file, char **copy_cmd, t_list **arg_cmd_tmp)
 {
-	char **arg_arr;
-	t_quote quote;
+	if (is_redirection(arg_cmd_tmp[1]->next_flag) == 1 && arg_cmd_tmp[1]->next == 0)
+	{
+		write(2, "minish: syntax error near unexpected token `newline'\n", 53);
+		g_status = 258;
+		free_two_dimension(copy_cmd);
+		arg_cmd_tmp[1] = arg_cmd_tmp[2];
+		ft_lstclear(&arg_cmd_tmp[0], free);
+		ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
+		return (1);
+	}
+	else if (error_file != 0)
+	{
+		write(2, "minish: ", 8); 
+		write(2, error_file, ft_strlen(error_file));
+		write(2, ": No such file or directory\n", 28);
+		g_status = 1;
+		free_two_dimension(copy_cmd);
+		free(error_file);
+		arg_cmd_tmp[1] = arg_cmd_tmp[2];
+		ft_lstclear(&arg_cmd_tmp[0], free);
+		ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
+		return (1);
+	}
+	return (0);
+}
 
+void	handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_envp *envp)
+{
+	char	**arg_arr;
+	t_quote	quote;
 	pid_t	pid;
+
 	set_signal();
 	add_history(line_prompt[0]);
 	check_quote(line_prompt[0], &quote);
-	arg_cmd_tmp[0] = get_arg_list(line_prompt[0], &quote);
+	arg_cmd_tmp[0] = arg_to_list(line_prompt[0], &quote);
 	arg_cmd_tmp[1] = list_to_char_arr(arg_cmd_tmp[0], envp);
 	arg_cmd_tmp[2] = arg_cmd_tmp[1];
 
@@ -176,29 +204,8 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_envp *envp)
 					}
 				}
 			}
-			if (is_redirection(arg_cmd_tmp[1]->next_flag) == 1 && arg_cmd_tmp[1]->next == 0)
-			{
-				write(2, "minish: syntax error near unexpected token `newline'\n", 53);
-				g_status = 258;
-				free_two_dimension(copy_cmd);
-				arg_cmd_tmp[1] = arg_cmd_tmp[2];
-				ft_lstclear(&arg_cmd_tmp[0], free);
-				ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
-				return;
-			}
-			if (error_file != 0)
-			{
-				write(2, "minish: ", 8); 
-				write(2, error_file, ft_strlen(error_file));
-				write(2, ": No such file or directory\n", 28);
-				g_status = 1;
-				free_two_dimension(copy_cmd);
-				free(error_file);
-				arg_cmd_tmp[1] = arg_cmd_tmp[2];
-				ft_lstclear(&arg_cmd_tmp[0], free);
-				ft_lstclear_two(&arg_cmd_tmp[1], free_two_dimension);
-				return;
-			}
+			if (redir_err(error_file, copy_cmd, arg_cmd_tmp) > 0)
+				return ;
 		}
 		if (current_cmd->pre_flag == PIPE || (arg_cmd_tmp[1]->next_flag == PIPE))
 		{
@@ -241,7 +248,6 @@ void handle_line(char **line_prompt, t_list **arg_cmd_tmp, t_envp *envp)
 				close(fds[current_fds - 1][0]);
 				close(fds[idx][1]);
 				set_signal();
-				free_two_dimension(copy_cmd);
 			}
 		}
 		else
@@ -280,8 +286,7 @@ int	main(int argc, char **argv, char **first_envp)
 
 	if (!argc || !(*argv[0]))
 		return (-1);
-	init_envp(&envp, first_envp);
-	g_status = 0;
+	init_envp_status(&envp, first_envp);
 	set_signal();
 	line_prompt = (char **)malloc(sizeof(char *) * 2);
 	arg_cmd_tmp = (t_list **)malloc(sizeof(t_list *) * 3);

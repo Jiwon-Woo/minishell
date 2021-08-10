@@ -1,9 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_path.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/08/10 10:37:01 by jwoo              #+#    #+#             */
+/*   Updated: 2021/08/10 12:03:42 by jwoo             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-char *parse_path(t_envp *envp)
+char	*parse_path(t_envp *envp)
 {
-	int flag;
-	int idx;
+	int	flag;
+	int	idx;
 
 	idx = -1;
 	flag = -1;
@@ -22,7 +34,8 @@ char *parse_path(t_envp *envp)
 int	get_last_slash_idx(char *arg)
 {
 	int	last;
-	int i;
+	int	i;
+
 	last = -1;
 	i = -1;
 	while (arg[++i])
@@ -33,9 +46,9 @@ int	get_last_slash_idx(char *arg)
 	return (last);
 }
 
-int get_file_type(char *path)
+int	get_file_type(char *path)
 {
-	struct	stat sb;
+	struct stat	sb;
 
 	if (stat(path, &sb) == -1)
 		return (-1);
@@ -45,56 +58,76 @@ int get_file_type(char *path)
 		return (0);
 }
 
-int	file_or_directory(char *arg)
+int	print_file_dir_err(char *arg, char **slash, int type)
 {
-	int	first_slash = 0;
-	int	last_slash = 0;
-	char	**slash;
-	char	*path = 0;
-	int	i = 0;
-	int	type;
-
-	if (arg[0] == '/')
-		first_slash = 1;
-	if (arg[ft_strlen(arg) - 1] == '/')
-		last_slash = 1;
-	slash = ft_split(arg, '/');
-	if (first_slash == 1)
-		path = ft_strjoin_with_free(path, ft_strdup("/"));
-	path = ft_strjoin_with_free(path, ft_strdup(slash[0]));
-	while ((type = get_file_type(path)) > 0 && slash[++i])
+	write(2, "minish: ", ft_strlen("minish: "));
+	write(2, arg, ft_strlen(arg));
+	if (type == 0)
 	{
-		path = ft_strjoin_with_free(path, ft_strdup("/"));
-		path = ft_strjoin_with_free(path, ft_strdup(slash[i]));
-	}
-	free(path);
-	if (type == 0 && slash[i + 1] == 0)
-		i++;
-	if ((slash[i] != 0 && type == 0) || (slash[i] == 0 && type == 0 && last_slash == 1))
-	{
-		write(2, "minish: ", ft_strlen("minish: "));
-		write(2, arg, ft_strlen(arg));
 		write(2, ": Not a directory\n", ft_strlen(": Not a directory\n"));
 		free_two_dimension(slash);
 		return (126);
-		// exit(20);
 	}
 	else if (type == -1)
 	{
-		write(2, "minish: ", ft_strlen("minish: "));
-		write(2, arg, ft_strlen(arg));
-		write(2, ": No such file or directory\n", ft_strlen(": No such file or directory\n"));
+		write(2, ": No such file or directory\n", \
+			ft_strlen(": No such file or directory\n"));
 		free_two_dimension(slash);
 		return (127);
 	}
-	else if (slash[i] == 0 && type == 1)
+	else
 	{
-		write(2, "minish: ", ft_strlen("minish: "));
-		write(2, arg, ft_strlen(arg));
 		write(2, ": is a directory\n", ft_strlen(": is a directory\n"));
 		free_two_dimension(slash);
-		return(126);
+		return (126);
 	}
+}
+
+int	get_type(int first_slash, char **slash, int *i)
+{
+	int		type;
+	char	*path;
+
+	path = 0;
+	if (first_slash == 1)
+		path = ft_strjoin_with_free(path, ft_strdup("/"));
+	path = ft_strjoin_with_free(path, ft_strdup(slash[0]));
+	type = get_file_type(path);
+	while (type > 0 && slash[++(*i)])
+	{
+		path = ft_strjoin_with_free(path, ft_strdup("/"));
+		path = ft_strjoin_with_free(path, ft_strdup(slash[*i]));
+		type = get_file_type(path);
+	}
+	free(path);
+	return (type);
+}
+
+int	file_or_directory(char *arg)
+{
+	int		slash_first_last[2];
+	char	**slash;
+	int		i;
+	int		type;
+
+	slash_first_last[0] = 0;
+	slash_first_last[1] = 0;
+	slash = 0;
+	i = 0;
+	if (arg[0] == '/')
+		slash_first_last[0] = 1;
+	if (arg[ft_strlen(arg) - 1] == '/')
+		slash_first_last[1] = 1;
+	slash = ft_split(arg, '/');
+	type = get_type(slash_first_last[0], slash, &i);
+	if (type == 0 && slash[i + 1] == 0)
+		i++;
+	if (!type && (slash[i] || (!slash[i] && slash_first_last[1] == 1)))
+		return (print_file_dir_err(arg, slash, type));
+	else if (type == -1)
+		return (print_file_dir_err(arg, slash, type));
+	else if (slash[i] == 0 && type == 1)
+		return (print_file_dir_err(arg, slash, type));
 	free_two_dimension(slash);
 	return (0);
 }

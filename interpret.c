@@ -97,7 +97,7 @@ int	interpret(char **arg_arr, t_envp *envp)
 	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
 		return (mini_exit(arg_arr, false));
 	if (ft_strncmp(arg_arr[0], "pwd", 4) == 0)
-		return (mini_pwd(arg_arr, envp));
+		return (mini_pwd());
 	if (ft_strncmp(arg_arr[0], "env", 4) == 0)
 		return (mini_env(arg_arr, envp));
 	if (last_slash != -1)
@@ -125,7 +125,7 @@ int	interpret2(char **arg_arr, t_envp *envp)
 	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
 		return (mini_exit(arg_arr, true));
 	if (ft_strncmp(arg_arr[0], "pwd", 4) == 0)
-		return (mini_pwd(arg_arr, envp));
+		return (mini_pwd());
 	if (ft_strncmp(arg_arr[0], "env", 4) == 0)
 		return (mini_env(arg_arr, envp));
 	pid = fork();

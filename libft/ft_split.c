@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_split.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/08/10 09:59:57 by jwoo              #+#    #+#             */
+/*   Updated: 2021/08/10 10:08:53 by jwoo             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "libft.h"
 
 static int	word_num(char *s, char c)
@@ -18,7 +30,7 @@ static int	word_num(char *s, char c)
 	return (num);
 }
 
-static char		**free_split(char **words, int num)
+static char	**free_split(char **words, int num)
 {
 	int	n;
 
@@ -33,7 +45,7 @@ static char		**free_split(char **words, int num)
 	return (words);
 }
 
-static char		**word_len(char **words, char *s, char c)
+static char	**word_len(char **words, char *s, char c)
 {
 	int	index;
 	int	len;
@@ -62,7 +74,7 @@ static char		**word_len(char **words, char *s, char c)
 	return (words);
 }
 
-static void		word_split(char **words, char *s, char c)
+static void	word_split(char **words, char *s, char c)
 {
 	int	index;
 	int	len;
@@ -91,10 +103,10 @@ static void		word_split(char **words, char *s, char c)
 	words[num] = 0;
 }
 
-char			**ft_split(char *s, char c)
+char	**ft_split(char *s, char c)
 {
 	char	**words;
-	int	num;
+	int		num;
 
 	if (s == 0)
 		return (0);

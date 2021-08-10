@@ -9,14 +9,19 @@ SOURCE = ft_split_space.c \
 		ft_atoi_ret_error.c \
 		ft_strjoin_with_free.c \
 		ft_lstclear_two.c \
-		ft_strjoin_two.c \
-		arg_lst_arr.c \
+		ft_str_append.c \
+		ft_free_null.c \
+		parse_lst_to_arr.c \
+		parse_arg_to_lst.c \
 		env.c \
+		export.c \
 		signal_handler.c \
 		mini_cmd.c \
 		parse_path.c \
 		interpret.c \
-		check_quote.c
+		check_quote.c \
+		remove_quote.c \
+		replace_env.c
 OBJECT = $(SOURCE:.c=.o)
 MAIN = minishell.c
 

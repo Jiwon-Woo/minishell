@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-int		mini_export(char **arg_arr, t_envp *envp)
+int	mini_export(char **arg_arr, t_envp *envp)
 {
 	int	i;
 	int	ret;
@@ -20,7 +20,8 @@ int		mini_export(char **arg_arr, t_envp *envp)
 			{
 				write(2, "minish: export: `", ft_strlen("minish: export: `"));
 				write(2, arg_arr[i], ft_strlen(arg_arr[i]));
-				write(2, "\': not a valid identifier\n", ft_strlen("\': not a valid identifier\n"));
+				write(2, "\': not a valid identifier\n", \
+					ft_strlen("\': not a valid identifier\n"));
 				ret = 1;
 			}
 		}
@@ -34,7 +35,7 @@ int		mini_export(char **arg_arr, t_envp *envp)
 	return (ret);
 }
 
-int mini_pwd()
+int	mini_pwd(void)
 {
 	char	*pwd;
 
@@ -45,11 +46,12 @@ int mini_pwd()
 	return (0);
 }
 
-int mini_env(char **arg, t_envp *envp)
+int	mini_env(char **arg, t_envp *envp)
 {
-	int	i;
-	int	size;
+	int		i;
+	int		size;
 	char	*error;
+	int		equal_idx;
 
 	error = "minish: env: too many arguments\n";
 	if (arg[1] != 0)
@@ -61,18 +63,19 @@ int mini_env(char **arg, t_envp *envp)
 	size = get_arg_size(envp->envp_list);
 	while (++i < size)
 	{
-		int equal_idx = get_equal_idx(envp->envp_list[i]);
+		equal_idx = get_equal_idx(envp->envp_list[i]);
 		if (equal_idx != -1)
 			printf("%s\n", envp->envp_list[i]);
 	}
 	return (0);
 }
 
-int mini_cd(char **arg, t_envp *envp)
+int	mini_cd(char **arg, t_envp *envp)
 {
 	int		ret;
 	char	**pwd;
 	char	*home;
+	char	*buf;
 
 	ret = 0;
 	home = get_value("HOME", envp->envp_list);
@@ -83,7 +86,7 @@ int mini_cd(char **arg, t_envp *envp)
 	if (ret != -1)
 	{
 		pwd = get_env_ptr("PWD", envp->envp_list);
-		char *buf = getcwd(NULL, 0);
+		buf = getcwd(NULL, 0);
 		free(*pwd);
 		*pwd = ft_strjoin("PWD=", buf);
 		free(buf);
@@ -101,7 +104,7 @@ int mini_cd(char **arg, t_envp *envp)
 	return (1);
 }
 
-int mini_exit(char **arg_arr, bool is_parent)
+int	mini_exit(char **arg_arr, bool is_parent)
 {
 	int	ret;
 	int	error;
@@ -137,11 +140,58 @@ int mini_exit(char **arg_arr, bool is_parent)
 	exit (((int)(char)(ret)));
 }
 
+int	get_flag(t_envp *envp, char **arg, int i)
+{
+	int	flag;
+	int	j;
+
+	j = -1;
+	flag = -1;
+	while (++j < get_arg_size(envp->envp_list))
+		if ((get_equal_idx(envp->envp_list[j]) == ft_strlen(arg[i]) \
+			&& ft_strncmp(envp->envp_list[j], arg[i], ft_strlen(arg[i])) == 0)
+			|| ft_strncmp(arg[i], envp->envp_list[j], ft_strlen(arg[i]) + 1) == 0)
+			flag = j;
+	return (flag);
+}
+
+void unset_var(t_envp *envp, int flag)
+{
+	char	**temp;
+	int		i;
+	int	idx;
+	
+	i = -1;
+	idx = 0;
+	temp = (char **)malloc(sizeof(char *) * get_arg_size(envp->envp_list));
+	if (temp == 0)
+		exit(1);
+	while (++i < get_arg_size(envp->envp_list))
+	{
+		if (i != flag)
+			temp[idx++] = envp->envp_list[i];
+		else
+			free(envp->envp_list[i]);
+	}
+	temp[idx] = 0;
+	if (envp->envp_list != 0)
+		free(envp->envp_list);
+	envp->envp_list = temp;
+}
+
+int	print_unset_err(char *arg)
+{
+	write(2, "minish: unset: `", ft_strlen("minish: unset: `"));
+	write(2, arg, ft_strlen(arg));
+	write(2, "\': not a valid identifier\n", \
+		ft_strlen("\': not a valid identifier\n"));
+	return (1);
+}
+
 int mini_unset(char **arg, t_envp *envp)
 {
 	int	size;
 	int	i;
-	int	j;
 	int	flag;
 	int ret;
 
@@ -155,43 +205,12 @@ int mini_unset(char **arg, t_envp *envp)
 		if (get_equal_idx(arg[i]) != -1 || env_validation(arg[i]) == -1)
 		{
 			if (ft_strlen(arg[i]) > 0)
-			{
-				write(2, "minish: unset: `", ft_strlen("minish: unset: `"));
-				write(2, arg[i], ft_strlen(arg[i]));
-				write(2, "\': not a valid identifier\n", ft_strlen("\': not a valid identifier\n"));
-				ret = 1;
-			}
+				ret = print_unset_err(arg[i]);
 			continue ;
 		}
-		j = -1;
-		flag = -1;
-		while (++j < get_arg_size(envp->envp_list))
-		{
-			if ((get_equal_idx(envp->envp_list[j]) == ft_strlen(arg[i]) && ft_strncmp(envp->envp_list[j], arg[i], ft_strlen(arg[i])) == 0)
-				|| ft_strncmp(arg[i], envp->envp_list[j], ft_strlen(arg[i]) + 1) == 0)
-				flag = j;
-		}
+		flag = get_flag(envp, arg, i);
 		if (flag != -1)
-		{
-			char **temp;
-
-			temp = (char **)malloc(sizeof(char *) * get_arg_size(envp->envp_list));
-			if (temp == 0)
-				exit(1);
-			j = -1;
-			int	idx = 0;
-			while (++j < get_arg_size(envp->envp_list))
-			{
-				if (j != flag)
-					temp[idx++] = envp->envp_list[j];
-				else
-					free(envp->envp_list[j]);
-			}
-			temp[idx] = 0;
-			if (envp->envp_list != 0)
-				free(envp->envp_list);
-			envp->envp_list = temp;
-		}
+			unset_var(envp, flag);
 	}
 	sort_envp_idx(envp);
 	return (ret);

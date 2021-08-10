@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   signal_handler.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/08/10 12:03:30 by jwoo              #+#    #+#             */
+/*   Updated: 2021/08/10 12:03:31 by jwoo             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 void	child_sigquit_handler(int signo)
@@ -34,7 +46,7 @@ void	redirect_sigint_handler(int signo)
 	signal(SIGINT, (void *)sigint_handler);
 }
 
-void	set_signal()
+void	set_signal(void)
 {
 	signal(SIGINT, (void *)sigint_handler);
 	signal(SIGQUIT, SIG_IGN);

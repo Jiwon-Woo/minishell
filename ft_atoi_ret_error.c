@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-int		atoi_sign(char *str)
+int	atoi_sign(char *str)
 {
 	int	sign;
 	int	idx;
@@ -20,7 +20,7 @@ int		atoi_sign(char *str)
 	return (sign);
 }
 
-int		ft_atoi(char *str, int *integer)
+int	ft_atoi(char *str, int *integer)
 {
 	int	idx;
 	int	num;

@@ -1,27 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstadd_front.c                                  :+:      :+:    :+:   */
+/*   ft_free_null.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/08/10 10:04:02 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/10 10:04:02 by jwoo             ###   ########.fr       */
+/*   Created: 2021/08/10 11:38:19 by jwoo              #+#    #+#             */
+/*   Updated: 2021/08/10 11:39:12 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "minishell.h"
 
-void	ft_lstadd_front(t_list **lst, t_list *new)
+void	free_null(char *str)
 {
-	if (lst == NULL || new == NULL)
-		return ;
-	if (*lst == NULL)
-	{
-		*lst = new;
-		return ;
-	}
-	new->next = *lst;
-	*lst = new;
-	return ;
+	if (str != 0)
+		free(str);
+	str = 0;
 }
