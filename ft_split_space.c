@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_split_space.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/08/10 13:02:52 by jwoo              #+#    #+#             */
+/*   Updated: 2021/08/10 13:03:35 by jwoo             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-void free_two_dimension(char **word)
+void	free_two_dimension(char **word)
 {
 	int	n;
 
@@ -14,7 +26,7 @@ void free_two_dimension(char **word)
 	word = 0;
 }
 
-int		factor_num(char *s)
+int	factor_num(char *s)
 {
 	int	num;
 	int	idx;
@@ -41,7 +53,7 @@ char	**factor_len(char **factor, char *s, int factor_num)
 
 	idx = 0;
 	num = 0;
-	while (num < factor_num && idx < ft_strlen(s))
+	while (factor != 0 && num < factor_num && idx < ft_strlen(s))
 	{
 		while (ft_isspace(s[idx]) == 1 && idx < ft_strlen(s))
 			idx++;
@@ -55,10 +67,7 @@ char	**factor_len(char **factor, char *s, int factor_num)
 		{
 			factor[num] = (char *)malloc(sizeof(char) * (len + 1));
 			if (factor[num] == 0)
-			{
 				free_two_dimension(factor);
-				return (0);
-			}
 			num++;
 		}
 	}

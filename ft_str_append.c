@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_str_append.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/08/10 13:05:30 by jwoo              #+#    #+#             */
+/*   Updated: 2021/08/10 13:05:31 by jwoo             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 int	get_arg_size(char **arg)
@@ -12,24 +24,26 @@ int	get_arg_size(char **arg)
 	return (size);
 }
 
-char **append_strarr(char **str1, char **str2)
+char	**append_strarr(char **str1, char **str2)
 {
-	char 	**ret_strarr;
-	int 	idx;
+	char	**ret_strarr;
+	int		idx;
 	int		i;
+	int		size;
 
-	ret_strarr = (char **)malloc(sizeof(char *) * (get_arg_size(str1) + get_arg_size(str2) + 1));
+	size = get_arg_size(str1) + get_arg_size(str2);
+	ret_strarr = (char **)malloc(sizeof(char *) * (size + 1));
 	if (!ret_strarr)
 		exit(1);
 	i = 0;
 	idx = 0;
-	while(str1 && str1[i])
+	while (str1 && str1[i])
 		ret_strarr[idx++] = ft_strdup(str1[i++]);
 	i = 0;
-	while(str2 && str2[i])
+	while (str2 && str2[i])
 		ret_strarr[idx++] = ft_strdup(str2[i++]);
 	ret_strarr[idx] = 0;
-	return(ret_strarr);
+	return (ret_strarr);
 }
 
 char	*str_append_char(char *str, char c)

@@ -6,17 +6,11 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 12:17:25 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/10 12:36:12 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/10 12:47:46 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-void	envp_substitute(t_envp *envp, char *content, int idx)
-{
-	free(envp->envp_list[idx]);
-	envp->envp_list[idx] = ft_strdup(content);
-}
 
 void	envp_add(t_envp *envp, char *content)
 {
@@ -93,7 +87,8 @@ void	with_eq(char **arg_arr, t_envp *envp, int i)
 		if (key_last == input_key_last && ft_strncmp(envp->envp_list[j], \
 			arg_arr[i], key_last) == 0)
 		{
-			envp_substitute(envp, arg_arr[i], j);
+			free(envp->envp_list[j]);
+			envp->envp_list[j] = ft_strdup(arg_arr[i]);
 			break ;
 		}
 	}
