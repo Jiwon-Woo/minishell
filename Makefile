@@ -1,8 +1,21 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2021/08/10 14:41:27 by jwoo              #+#    #+#              #
+#    Updated: 2021/08/11 12:50:59 by jwoo             ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 USER = $(LOGNAME)
 NAME = minishell
 LIB = libminishell.a
 CFLAGS = -Wall -Wextra -Werror
-LIBREADLINE = -L/usr/include -lreadline -L/Users/$(USER)/.brew/opt/readline/lib -I /Users/$(USER)/.brew/opt/readline/include
+INCLUDEREADLINE = -I/Users/$(USER)/.brew/opt/readline/include
+LIBREADLINE = -L/usr/include -L/Users/$(USER)/.brew/opt/readline/lib -lreadline
 LIBMINISHELL = -L. -lminishell
 LIBFT = -L./libft -lft
 SOURCE = ft_split_space.c \
@@ -10,22 +23,27 @@ SOURCE = ft_split_space.c \
 		ft_strjoin_with_free.c \
 		ft_lstclear_two.c \
 		ft_str_append.c \
-		ft_free_null.c \
 		parse_lst_to_arr.c \
 		parse_arg_to_lst.c \
-		env.c \
+		parse_file_type.c \
+		parse_path.c \
+		parse_exec.c \
+		init_envp.c \
 		export.c \
 		signal_handler.c \
-		mini_cmd.c \
-		parse_path.c \
+		mini_cd.c \
+		mini_env.c \
+		mini_exit.c \
+		mini_export.c \
+		mini_pwd.c \
+		mini_unset.c \
 		interpret.c \
 		check_quote.c \
 		remove_quote.c \
-		replace_env.c
+		replace_env.c \
+		handle_line_leak.c
 OBJECT = $(SOURCE:.c=.o)
 MAIN = minishell.c
-
-LOCAL = -I/usr/local/opt/readline/include -L/usr/local/opt/readline/lib -lreadline
 
 all : $(NAME)
 
@@ -34,11 +52,12 @@ libft :
 
 $(NAME): $(LIB) $(MAIN) libft
 #	gcc $(MAIN) $(CFLAGS) $(LIBMINISHELL) $(LIBFT) $(LIBREADLINE) -o $(NAME)
-	gcc $(MAIN) $(CFLAGS) $(LIBMINISHELL) $(LIBFT) $(LOCAL) -o $(NAME)
+	gcc -g $(MAIN) $(CFLAGS) $(LIBMINISHELL) $(LIBFT) -L/usr/local/opt/readline/lib -lreadline -o $(NAME)
 $(LIB): $(OBJECT)
 	@ar rcs $(LIB) $(OBJECT)
 $(OBJECT): $(SOURCE)
-	@gcc -c $(CFLAGS) $(SOURCE)
+#	@gcc -c $(CFLAGS) $(SOURCE) $(INCLUDEREADLINE)
+	@gcc -c $(CFLAGS) $(SOURCE) -I/usr/local/opt/readline/include
 
 clean:
 	@rm -f $(OBJECT)

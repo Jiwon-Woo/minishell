@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 11:02:06 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/10 11:33:52 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/10 20:45:23 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,29 @@ int	without_quote_env(char **ret, char *cmd_line, int i)
 	while (cmd_line[i] != '\'' && cmd_line[i] != '\"'
 		&& cmd_line[i] != '$' && cmd_line[i] != 0)
 		*ret = str_append_char(*ret, cmd_line[i++]);
+	return (i);
+}
+
+int	find_env(char **ret, char *cmd_line, int i, t_envp *envp)
+{
+	char	*key;
+
+	key = 0;
+	while (is_valid_env(cmd_line, i))
+		key = str_append_char(key, cmd_line[i++]);
+	if (key == 0 && (cmd_line[i] == '$' || cmd_line[i] == '?'))
+	{
+		if (cmd_line[i] == '$')
+			key = ft_strdup("$");
+		else
+			*ret = ft_strjoin_with_free(*ret, ft_itoa(g_status));
+		i++;
+	}
+	else
+		replace_env_value(key, ret, envp);
+	if (key != 0)
+		free(key);
+	key = 0;
 	return (i);
 }
 

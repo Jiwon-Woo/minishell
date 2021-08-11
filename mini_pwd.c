@@ -1,20 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_free_null.c                                     :+:      :+:    :+:   */
+/*   mini_pwd.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/08/10 11:38:19 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/10 12:58:56 by jwoo             ###   ########.fr       */
+/*   Created: 2021/08/10 16:33:19 by jwoo              #+#    #+#             */
+/*   Updated: 2021/08/10 20:49:39 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	free_null(char *str)
+int	mini_pwd(void)
 {
-	if (str != 0)
-		free(str);
-	str = 0;
+	char	*pwd;
+
+	pwd = getcwd(NULL, 0);
+	printf("%s\n", pwd);
+	if (pwd != 0)
+		free(pwd);
+	pwd = 0;
+	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 11:42:45 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/10 12:24:03 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/11 12:50:56 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,18 +53,90 @@ typedef struct s_envp
 	int		*sort_idx;
 }	t_envp;
 
-void	free_null(char *str);
+typedef struct s_fd
+{
+	// int		**pipe_fds;
+	int		size;
+	int		idx;
+	int		current_idx;
+	int		fd[2];
+}	t_fd;
+//t_list	*current_cmd, t_list **arg_cmd_tmp, char **copy_cmd
+typedef struct s_cmd
+{
+	t_list	*current_cmd;
+	t_list	*argument;
+	t_list	*command;
+	t_list	*first_cmd;
+	char	**append_cmd;
+}	t_cmd;
+
+void	init_quote(t_quote *quote);
+int		is_remain_quote(char *line, int idx, char quote);
+void	valid_or_invalid_quote(char *line, int idx, t_quote *quote);
+void	check_quote(char *line, t_quote *quote);
+
+int		env_validation(char *name);
+void	envp_add(t_envp *envp_, char *content);
+int		export_without_arg(char **arg_arr);
+
+int		atoi_sign(char *str);
+int		ft_atoi(char *str, int *integer);
+
+void	ft_lstclear_two(t_list **lst, void (*del)(char **));
 
 int		factor_num(char *s);
 char	**factor_len(char **factor, char *s, int factor_num);
 void	factor_split(char **factor, char *s, int factor_num);
 void	free_two_dimension(char **word);
 char	**ft_split_space(char *s);
-void	ft_lstclear_two(t_list **lst, void (*del)(char **));
 
 int		get_arg_size(char **arg);
 char	*str_append_char(char *str, char c);
 char	**append_strarr(char **str1, char **str2);
+
+char	*strjoin_exception_case(char *s1, char *s2);
+void	free_strjoin_arg(char *s1, char *s2);
+char	*ft_strjoin_with_free(char *s1, char *s2);
+
+void	arr_swap(int *arr, int i, int j);
+void	sort_envp_idx(t_envp *envp);
+void	init_envp_status(t_envp *envp, char **first_envp);
+
+int		interpret(char **arg_arr, t_envp *envp);
+int		interpret2(char **arg_arr, t_envp *envp);
+
+char	**get_env_ptr(char *key, char **envp);
+int		mini_cd(char **arg, t_envp *envp);
+
+int		mini_env(char **arg, t_envp *envp);
+int		mini_exit(char **arg_arr, bool is_parent);
+
+void	print_export(t_envp *envp);
+void	with_eq(char **arg_arr, t_envp *envp, int i);
+void	without_eq(char **arg_arr, t_envp *envp, int i);
+int		print_export_err(char *arg);
+int		mini_export(char **arg_arr, t_envp *envp);
+
+int		mini_pwd(void);
+
+int		get_flag(t_envp *envp, char **arg, int i);
+void	unset_var(t_envp *envp, int flag);
+int		print_unset_err(char *arg);
+int		mini_unset(char **arg, t_envp *envp);
+
+int		valid_quote(char **arg, char *line, t_quote *quote, int *i);
+void	invalid_quote(char **arg, char *line, int *i);
+t_list	*arg_to_list(char *line, t_quote *quote);
+
+int		with_path(char **arg_arr, t_envp *envp);
+int		exec_file(char *path, char **arg_arr, t_envp *envp);
+int		without_path(char **arg_arr, t_envp *envp);
+
+int		get_file_type(char *path);
+int		print_file_dir_err(char *arg, char **slash, int type);
+int		get_type(int first_slash, char **slash, int *i);
+int		file_or_directory(char *arg);
 
 int		is_separate(char *command);
 int		get_unit_size(t_list *arg_list);
@@ -72,68 +144,30 @@ void	add_one_unit_cmd(t_list **arg_list, t_list **cmd_list, char	**arg_arr);
 void	add_one_line_of_cmd(t_list **arg_list, t_envp *envp, t_list **cmd_list);
 t_list	*list_to_char_arr(t_list *arg_list, t_envp *envp);
 
-int		valid_quote(char **arg, char *line, t_quote *quote, int *i);
-void	invalid_quote(char **arg, char *line, int *i);
-t_list	*arg_to_list(char *line, t_quote *quote);
+char	*parse_path(t_envp *envp);
+int		get_last_slash_idx(char *arg);
 
 int		in_single_quote(char **ret, char *cmd_line, int i);
 int		in_double_quote(char **ret, char *cmd_line, int i, t_envp *envp);
 int		without_quote_env(char **ret, char *cmd_line, int i);
+int		find_env(char **ret, char *cmd_line, int i, t_envp *envp);
 char	*remove_quote(char *cmd_line, t_envp *envp);
 
 int		get_equal_idx(char *env_line);
 char	*get_value(char *key, char **envp);
 void	replace_env_value(char *key, char **ret, t_envp *envp);
 int		is_valid_env(char *cmd_line, int i);
-int		find_env(char **ret, char *cmd_line, int i, t_envp *envp);
-
-void	init_quote(t_quote *quote);
-int		is_remain_quote(char *line, int idx, char quote);
-void	valid_or_invalid_quote(char *line, int idx, t_quote *quote);
-void	check_quote(char *line, t_quote *quote);
-
-int		atoi_sign(char *str);
-int		ft_atoi(char *str, int *integer);
-
-char	*ft_strjoin_with_free(char *s1, char *s2);
+char	*get_path(char **env_path, char *arg);
 
 void	sigint_handler(int signo);
-void	child_sigquit_handler(int signo);
-void	child_sigint_handler(int signo);
-void	redirect_sigint_handler(int signo);
+void	child_handler(int signo);
+void	redirect_handler(int signo);
+void	set_child_signal(void);
 void	set_signal(void);
-void	sigquit_handler(int signo);
 
-int		env_validation(char *name);
-void	arr_swap(int *arr, int i, int j);
-void	sort_envp_idx(t_envp *envp);
-char	**get_env_ptr(char *key, char **envp);
-void	init_envp_status(t_envp *envp, char **first_envp);
-
-void	envp_add(t_envp *envp_, char *content);
-int		export_without_arg(char **arg_arr);
-void	print_export(t_envp *envp);
-void	with_eq(char **arg_arr, t_envp *envp, int i);
-void	without_eq(char **arg_arr, t_envp *envp, int i);
-
-int		mini_export(char **arg_arr, t_envp *envp);
-int		mini_pwd(void);
-int		mini_env(char **arg, t_envp *envp);
-int		mini_cd(char **arg, t_envp *envp);
-int		mini_exit(char **arg_arr, bool is_parent);
-int		mini_unset(char **arg, t_envp *envp);
-
-char	*parse_path(t_envp *envp);
-int		get_last_slash_idx(char *arg);
-int		get_file_type(char *path);
-int		print_file_dir_err(char *arg, char **slash, int type);
-int		get_type(int first_slash, char **slash, int *i);
-int		file_or_directory(char *arg);
-
-int		with_path(char **arg_arr, t_envp *envp);
-int		exec_file(char *path, char **arg_arr, t_envp *envp);
-int		without_path(char **arg_arr, t_envp *envp);
-int		interpret(char **arg_arr, t_envp *envp);
-int		interpret2(char **arg_arr, t_envp *envp);
+int		is_redirection(int flag);
+int		is_output_redirect(int flag);
+void	handle_line(char **line_prompt, t_cmd *cmd, t_envp *envp);
+int		redir_err(char *error_file, t_cmd *cmd);
 
 #endif
