@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 21:42:54 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 11:26:46 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/12 17:11:11 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,35 +23,6 @@ char	*make_prompt(void)
 		free(buffer);
 	buffer = 0;
 	return (prompt);
-}
-
-void	handle_line(char **line_prompt, t_cmd *cmd, t_envp *envp, t_fd *fd)
-{
-	t_quote	quote;
-
-	set_signal();
-	add_history(line_prompt[0]);
-	check_quote(line_prompt[0], &quote);
-	init_cmd(line_prompt[0], cmd, envp, quote);
-	init_fd(fd, cmd->command);
-	while (cmd->command)
-	{
-		set_fd_cmd(fd, cmd);
-		if (is_redirection(cmd->current_cmd->pre_flag) == 0 \
-			&& is_redirection(cmd->command->next_flag) == 1)
-			if (redirection(cmd, fd) > 0)
-				return (free_cmd_fd(cmd, fd));
-		if (cmd->current_cmd->pre_flag == PIPE \
-			|| (cmd->command->next_flag == PIPE))
-		{
-			if (handle_pipe(cmd, fd, envp) > 0)
-				return (free_cmd_fd(cmd, fd));
-		}
-		else
-			handle_simple(fd, cmd, envp);
-		cmd->command = cmd->command->next;
-	}
-	return (free_cmd_fd(cmd, fd));
 }
 
 void	minishell(char **first_envp)

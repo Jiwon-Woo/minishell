@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 11:42:45 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 12:32:14 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/12 17:18:34 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ typedef struct s_fd
 	int		current_idx;
 	int		*fd;
 }	t_fd;
-//t_list	*current_cmd, t_list **arg_cmd_tmp, char **copy_cmd
+
 typedef struct s_cmd
 {
 	t_list	*current_cmd;
@@ -166,30 +166,38 @@ void	redirect_handler(int signo);
 void	set_child_signal(void);
 void	set_signal(void);
 
-int		is_redirection(int flag);
-int		is_output_redirect(int flag);
-int		redir_err(char *error_file, t_cmd *cmd);
 void	free_fd(t_fd *fd);
 void	free_cmd(t_cmd *cmd);
-void	append_cmd(t_cmd *cmd, char **redirect_cmd);
-int		output_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd);
-int		input_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd, char **error_file);
-void	eof_child(t_fd *fd, char **redirect_cmd);
-int		free_error_file_ret(char **error_file);
-int		eof_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd, char **error_file);
-int		redirect_case(t_cmd *cmd, t_fd *fd, char **redirect_cmd, char **error_file);
-int		redirection(t_cmd *cmd, t_fd *fd);
-void	init_fd(t_fd *fd, t_list *cmd);
-void	handle_simple(t_fd *fd, t_cmd *cmd, t_envp *envp);
-void	init_cmd(char *line, t_cmd *cmd, t_envp *envp, t_quote quote);
-void	set_fd_cmd(t_fd *fd, t_cmd *cmd);
 void	free_cmd_fd(t_cmd *cmd, t_fd *fd);
+int		free_error_file_ret(char **error_file);
+
+void	handle_simple(t_fd *fd, t_cmd *cmd, t_envp *envp);
+void	handle_line(char **line_prompt, t_cmd *cmd, t_envp *envp, t_fd *fd);
+
 int		print_pipe_err(void);
 int		pipe_parent(t_fd *fd);
 int		handle_pipe(t_cmd *cmd, t_fd *fd, t_envp *envp);
 
+int		output_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd);
+int		input_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd, \
+		char **error_file);
+void	eof_child(t_fd *fd, char **redirect_cmd);
+int		eof_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd, \
+		char **error_file);
+int		redirect_case(t_cmd *cmd, t_fd *fd, char **redirect_cmd, \
+		char **error_file);
+
+int		is_redirection(int flag);
+int		is_output_redirect(int flag);
+int		redir_err(char *error_file, t_cmd *cmd);
+void	append_cmd(t_cmd *cmd, char **redirect_cmd);
+int		handle_redirect(t_cmd *cmd, t_fd *fd);
+
+void	init_fd(t_fd *fd, t_list *cmd);
+void	init_cmd(char *line, t_cmd *cmd, t_envp *envp, t_quote quote);
+void	set_fd_cmd(t_fd *fd, t_cmd *cmd);
+
 char	*make_prompt(void);
-void	handle_line(char **line_prompt, t_cmd *cmd, t_envp *envp, t_fd *fd);
 void	minishell(char **first_envp);
 
 #endif

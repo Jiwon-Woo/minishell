@@ -6,7 +6,7 @@
 #    By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/08/10 14:41:27 by jwoo              #+#    #+#              #
-#    Updated: 2021/08/12 08:35:25 by jwoo             ###   ########.fr        #
+#    Updated: 2021/08/12 17:20:11 by jwoo             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,7 +41,12 @@ SOURCE = ft_split_space.c \
 		check_quote.c \
 		remove_quote.c \
 		replace_env.c \
-		handle_line.c
+		handle_line.c \
+		handle_free.c \
+		handle_pipe.c \
+		handle_redirect.c \
+		handle_redirect_case.c \
+		init_fd_cmd.c
 OBJECT = $(SOURCE:.c=.o)
 MAIN = minishell.c
 
