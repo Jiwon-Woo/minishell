@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/11 09:36:59 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/11 09:37:01 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/12 13:00:35 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,13 @@ int	free_ret(char *str, int ret)
 	return (ret);
 }
 
+void	print_cd_err(char *arg)
+{
+	write(2, "minish: ", ft_strlen("minish: "));
+	write(2, arg, ft_strlen(arg));
+	write(2, ": Not a directory\n", ft_strlen(": Not a directory\n"));
+}
+
 int	mini_cd(char **arg, t_envp *envp)
 {
 	int		ret;
@@ -56,7 +63,7 @@ int	mini_cd(char **arg, t_envp *envp)
 	}
 	else if (arg[1] == 0)
 		file_or_directory(home);
-	else
-		file_or_directory(arg[1]);
+	else if (!file_or_directory(arg[1]))
+		print_cd_err(arg[1]);
 	return (free_ret(home, 1));
 }

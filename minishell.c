@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 21:42:54 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/11 11:55:07 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/12 11:26:46 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,40 +25,54 @@ char	*make_prompt(void)
 	return (prompt);
 }
 
-int	is_redirection(int flag)
+void	handle_line(char **line_prompt, t_cmd *cmd, t_envp *envp, t_fd *fd)
 {
-	if (flag <= REDIRECT4 && flag >= REDIRECT1)
-		return (1);
-	return (0);
+	t_quote	quote;
+
+	set_signal();
+	add_history(line_prompt[0]);
+	check_quote(line_prompt[0], &quote);
+	init_cmd(line_prompt[0], cmd, envp, quote);
+	init_fd(fd, cmd->command);
+	while (cmd->command)
+	{
+		set_fd_cmd(fd, cmd);
+		if (is_redirection(cmd->current_cmd->pre_flag) == 0 \
+			&& is_redirection(cmd->command->next_flag) == 1)
+			if (redirection(cmd, fd) > 0)
+				return (free_cmd_fd(cmd, fd));
+		if (cmd->current_cmd->pre_flag == PIPE \
+			|| (cmd->command->next_flag == PIPE))
+		{
+			if (handle_pipe(cmd, fd, envp) > 0)
+				return (free_cmd_fd(cmd, fd));
+		}
+		else
+			handle_simple(fd, cmd, envp);
+		cmd->command = cmd->command->next;
+	}
+	return (free_cmd_fd(cmd, fd));
 }
 
-int	is_output_redirect(int flag)
-{
-	if (flag == REDIRECT2 || flag == REDIRECT4)
-		return (1);
-	return (0);
-}
-
-int	main(int argc, char **argv, char **first_envp)
+void	minishell(char **first_envp)
 {
 	t_cmd		*cmd;
 	char		**line_prompt;
 	t_envp		envp;
+	t_fd		*fd;
 
-	if (!argc || !(*argv[0]))
-		return (-1);
 	init_envp_status(&envp, first_envp);
 	set_signal();
 	line_prompt = (char **)malloc(sizeof(char *) * 2);
 	cmd = (t_cmd *)malloc(sizeof(t_cmd));
-	if (!line_prompt || !cmd)
+	fd = (t_fd *)malloc(sizeof(t_fd));
+	if (!line_prompt || !cmd || !fd)
 		exit(1);
 	line_prompt[1] = make_prompt();
 	line_prompt[0] = readline(line_prompt[1]);
 	while (line_prompt[0] != NULL)
 	{
-		handle_line(line_prompt, cmd, &envp);
-		fprintf(stderr, "hihi1\n");
+		handle_line(line_prompt, cmd, &envp, fd);
 		free(line_prompt[0]);
 		free(line_prompt[1]);
 		line_prompt[1] = make_prompt();
@@ -66,5 +80,12 @@ int	main(int argc, char **argv, char **first_envp)
 	}
 	free(line_prompt[1]);
 	mini_exit(0, true);
+}
+
+int	main(int argc, char **argv, char **envp)
+{
+	if (!argc || !(*argv[0]))
+		return (-1);
+	minishell(envp);
 	return (0);
 }

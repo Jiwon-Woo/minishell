@@ -6,7 +6,7 @@
 #    By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/08/10 14:41:27 by jwoo              #+#    #+#              #
-#    Updated: 2021/08/11 12:50:59 by jwoo             ###   ########.fr        #
+#    Updated: 2021/08/12 08:35:25 by jwoo             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,7 +41,7 @@ SOURCE = ft_split_space.c \
 		check_quote.c \
 		remove_quote.c \
 		replace_env.c \
-		handle_line_leak.c
+		handle_line.c
 OBJECT = $(SOURCE:.c=.o)
 MAIN = minishell.c
 

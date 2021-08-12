@@ -6,13 +6,13 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/11 09:33:57 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/11 09:33:58 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/12 12:32:02 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	is_not_bulitin(char **arg_arr, t_envp *envp)
+int	is_not_bulitin(char **arg_arr, t_envp *envp, bool is_parent)
 {
 	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
 		return (mini_cd(arg_arr, envp));
@@ -21,7 +21,7 @@ int	is_not_bulitin(char **arg_arr, t_envp *envp)
 	if (ft_strncmp(arg_arr[0], "unset", 6) == 0)
 		return (mini_unset(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0], "exit", 5) == 0)
-		return (mini_exit(arg_arr, false));
+		return (mini_exit(arg_arr, is_parent));
 	if (ft_strncmp(arg_arr[0], "pwd", 4) == 0)
 		return (mini_pwd());
 	if (ft_strncmp(arg_arr[0], "env", 4) == 0)
@@ -56,7 +56,7 @@ int	is_bulitin(char **arg_arr, t_envp *envp, int last_slash)
 	}
 }
 
-int	interpret(char **arg_arr, t_envp *envp)
+int	interpret_with_pipe(char **arg_arr, t_envp *envp)
 {
 	int	last_slash;
 	int	bulit;
@@ -64,7 +64,7 @@ int	interpret(char **arg_arr, t_envp *envp)
 	if (arg_arr[0] == 0)
 		return (0);
 	last_slash = get_last_slash_idx(arg_arr[0]);
-	bulit = is_not_bulitin(arg_arr, envp);
+	bulit = is_not_bulitin(arg_arr, envp, false);
 	if (bulit != -1)
 		return (bulit);
 	if (last_slash != -1)
@@ -73,7 +73,7 @@ int	interpret(char **arg_arr, t_envp *envp)
 		return (without_path(arg_arr, envp));
 }
 
-int	interpret2(char **arg_arr, t_envp *envp)
+int	interpret_without_pipe(char **arg_arr, t_envp *envp)
 {
 	int		last_slash;
 	int		bulit;
@@ -81,7 +81,7 @@ int	interpret2(char **arg_arr, t_envp *envp)
 	if (arg_arr[0] == 0)
 		return (0);
 	last_slash = get_last_slash_idx(arg_arr[0]);
-	bulit = is_not_bulitin(arg_arr, envp);
+	bulit = is_not_bulitin(arg_arr, envp, true);
 	if (bulit != -1)
 		return (bulit);
 	else
