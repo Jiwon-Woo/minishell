@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/12 17:07:13 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 17:07:14 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/12 18:26:34 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,16 @@ int	is_redirection(int flag)
 	return (0);
 }
 
-int	is_output_redirect(int flag)
+char	*to_sperate(int num)
 {
-	if (flag == REDIRECT2 || flag == REDIRECT4)
-		return (1);
+	if (num == REDIRECT1)
+		return (ft_strdup("<"));
+	else if (num == REDIRECT2)
+		return (ft_strdup(">"));
+	else if (num == REDIRECT3)
+		return (ft_strdup("<<"));
+	else if (num == REDIRECT4)
+		return (ft_strdup(">>"));
 	return (0);
 }
 

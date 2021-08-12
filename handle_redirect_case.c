@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/12 17:07:18 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 17:07:19 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/12 18:36:22 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,17 @@
 int	output_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd)
 {
 	if (cmd->command->pre_flag == REDIRECT2)
+	{
+		if (fd->fd[1] > 0)
+			close(fd->fd[1]);
 		fd->fd[1] = open(redirect_cmd[0], O_WRONLY | O_TRUNC | O_CREAT, 0644);
+	}
 	if (cmd->command->pre_flag == REDIRECT4)
+	{
+		if (fd->fd[1] > 0)
+			close(fd->fd[1]);
 		fd->fd[1] = open(redirect_cmd[0], O_WRONLY | O_APPEND | O_CREAT, 0644);
+	}
 	append_cmd(cmd, redirect_cmd);
 	if (fd->fd[1] < 0)
 		return (1);
@@ -26,11 +34,22 @@ int	output_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd)
 
 int	input_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd, char **error_file)
 {
+	char	*seperate;
+
 	if (redirect_cmd == 0 || redirect_cmd[0] == 0)
 	{
-		write(2, "minish: syntax error near unexpected token `newline'\n", 53);
-		return (1);
+		seperate = to_sperate(cmd->command->next_flag);
+		write(2, "minish: syntax error near unexpected token `", 44);
+		if (cmd->command->next == 0)
+			write(2, "newline", 7);
+		else
+			write(2, seperate, ft_strlen(seperate));
+		write(2, "'\n", 2);
+		g_status = 258;
+		return (free_ret(seperate, 1));
 	}
+	if (fd->fd[0] > 0)
+		close(fd->fd[0]);
 	fd->fd[0] = open(redirect_cmd[0], O_RDONLY);
 	if (fd->fd[0] == -1)
 	{
@@ -87,7 +106,8 @@ int	eof_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd, char **error_file)
 
 int	redirect_case(t_cmd *cmd, t_fd *fd, char **redirect_cmd, char **error_file)
 {
-	if (is_output_redirect(cmd->command->pre_flag) == 1)
+	if (cmd->command->pre_flag == REDIRECT2 \
+		|| cmd->command->pre_flag == REDIRECT4)
 	{
 		if (output_redirect(cmd, fd, redirect_cmd) > 0)
 			return (1);

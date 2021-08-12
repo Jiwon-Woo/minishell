@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 11:42:45 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 17:18:34 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/12 18:24:20 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ int		is_not_bulitin(char **arg_arr, t_envp *envp, bool is_parent);
 int		interpret_with_pipe(char **arg_arr, t_envp *envp);
 int		interpret_without_pipe(char **arg_arr, t_envp *envp);
 
+int		free_ret(char *str, int ret);
 char	**get_env_ptr(char *key, char **envp);
 int		mini_cd(char **arg, t_envp *envp);
 
@@ -187,8 +188,8 @@ int		eof_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd, \
 int		redirect_case(t_cmd *cmd, t_fd *fd, char **redirect_cmd, \
 		char **error_file);
 
+char	*to_sperate(int num);
 int		is_redirection(int flag);
-int		is_output_redirect(int flag);
 int		redir_err(char *error_file, t_cmd *cmd);
 void	append_cmd(t_cmd *cmd, char **redirect_cmd);
 int		handle_redirect(t_cmd *cmd, t_fd *fd);
