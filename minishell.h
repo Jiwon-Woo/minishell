@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 11:42:45 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 18:24:20 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/14 11:39:09 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,10 @@
 # define MINISHELL_H
 
 # include <stdio.h>
-# include <math.h>
-# include <limits.h>
 # include <fcntl.h>
 # include <sys/stat.h>
 # include <readline/readline.h>
 # include <readline/history.h>
-# include <stdlib.h>
-# include <unistd.h>
-# include <errno.h>
-# include <string.h>
 # include <stdbool.h>
 # include <signal.h>
 # include "libft/libft.h"
@@ -96,7 +90,7 @@ char	*str_append_char(char *str, char c);
 char	**append_strarr(char **str1, char **str2);
 
 char	*strjoin_exception_case(char *s1, char *s2);
-void	free_strjoin_arg(char *s1, char *s2);
+void	free_strjoin_arg(char **s1, char **s2);
 char	*ft_strjoin_with_free(char *s1, char *s2);
 
 void	arr_swap(int *arr, int i, int j);
@@ -107,10 +101,11 @@ int		is_not_bulitin(char **arg_arr, t_envp *envp, bool is_parent);
 int		interpret_with_pipe(char **arg_arr, t_envp *envp);
 int		interpret_without_pipe(char **arg_arr, t_envp *envp);
 
-int		free_ret(char *str, int ret);
+int		free_ret(char **str, int ret);
 char	**get_env_ptr(char *key, char **envp);
 int		mini_cd(char **arg, t_envp *envp);
 
+int		mini_echo(char **arg_arr);
 int		mini_env(char **arg, t_envp *envp);
 int		mini_exit(char **arg_arr, bool is_parent);
 
@@ -132,7 +127,7 @@ void	invalid_quote(char **arg, char *line, int *i);
 t_list	*arg_to_list(char *line, t_quote *quote);
 
 int		with_path(char **arg_arr, t_envp *envp);
-int		exec_file(char *path, char **arg_arr, t_envp *envp);
+int		exec_file(char **path, char **arg_arr, t_envp *envp);
 int		without_path(char **arg_arr, t_envp *envp);
 
 int		get_file_type(char *path);

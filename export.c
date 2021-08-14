@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 12:17:25 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/10 17:51:52 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/13 23:11:47 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ void	envp_add(t_envp *envp, char *content)
 	while (old_envp[++i])
 		envp->envp_list[i] = old_envp[i];
 	free(old_envp);
+	old_envp = 0;
 	envp->envp_list[i++] = ft_strdup(content);
 	envp->envp_list[i] = 0;
 }

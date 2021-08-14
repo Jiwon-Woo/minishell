@@ -6,7 +6,7 @@
 #    By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/08/10 14:41:27 by jwoo              #+#    #+#              #
-#    Updated: 2021/08/12 17:20:11 by jwoo             ###   ########.fr        #
+#    Updated: 2021/08/14 11:00:05 by jwoo             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,6 +32,7 @@ SOURCE = ft_split_space.c \
 		export.c \
 		signal_handler.c \
 		mini_cd.c \
+		mini_echo.c \
 		mini_env.c \
 		mini_exit.c \
 		mini_export.c \

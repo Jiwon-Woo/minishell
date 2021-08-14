@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/12 17:07:13 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 18:26:34 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/14 11:27:41 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ void	append_cmd(t_cmd *cmd, char **redirect_cmd)
 		temp = cmd->append_cmd;
 		cmd->append_cmd = append_strarr(cmd->append_cmd, redirect_cmd + 1);
 		free_two_dimension(temp);
+		temp = 0;
 	}
 }
 

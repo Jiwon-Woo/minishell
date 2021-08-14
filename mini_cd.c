@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/11 09:36:59 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 13:00:35 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/14 11:23:41 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,11 @@ char	**get_env_ptr(char *key, char **envp)
 	return (0);
 }
 
-int	free_ret(char *str, int ret)
+int	free_ret(char **str, int ret)
 {
-	if (str != 0)
-		free(str);
-	str = 0;
+	if (*str != 0)
+		free(*str);
+	*str = 0;
 	return (ret);
 }
 
@@ -59,11 +59,11 @@ int	mini_cd(char **arg, t_envp *envp)
 		pwd = get_env_ptr("PWD", envp->envp_list);
 		free(*pwd);
 		*pwd = ft_strjoin_with_free(ft_strdup("PWD="), getcwd(NULL, 0));
-		return (free_ret(home, 0));
+		return (free_ret(&home, 0));
 	}
 	else if (arg[1] == 0)
 		file_or_directory(home);
 	else if (!file_or_directory(arg[1]))
 		print_cd_err(arg[1]);
-	return (free_ret(home, 1));
+	return (free_ret(&home, 1));
 }

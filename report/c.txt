@@ -1,0 +1,908 @@
+==61881== Memcheck, a memory error detector
+==61881== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==61881== Using Valgrind-3.18.0.GIT-lbmacos-eec4cf7e2b-20210416 and LibVEX; rerun with -h for copyright info
+==61881== Command: ./minishell
+==61881== Parent PID: 61659
+==61881== 
+--61881-- 
+--61881-- Valgrind options:
+--61881--    --leak-check=full
+--61881--    --log-file=c.txt
+--61881--    -v
+--61881--    --error-limit=no
+--61881-- Output from sysctl({CTL_KERN,KERN_VERSION}):
+--61881--   Darwin Kernel Version 19.6.0: Tue Jan 12 22:13:05 PST 2021; root:xnu-6153.141.16~1/RELEASE_X86_64
+--61881-- Arch and hwcaps: AMD64, LittleEndian, amd64-cx16-lzcnt-rdtscp-sse3-ssse3-avx-avx2-bmi-f16c-rdrand-rdseed
+--61881-- Page sizes: currently 4096, max supported 4096
+--61881-- Valgrind library directory: /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind
+--61881-- ./minishell (rx at 0x100000000, rw at 0x100008000)
+--61881--    reading syms   from primary file (123 22)
+--61881--    dSYM= ./minishell.dSYM/Contents/Resources/DWARF/minishell
+--61881--    reading dwarf3 from dsyms file
+--61881-- /usr/lib/dyld (rx at 0x100014000, rw at 0x1000a6000)
+--61881--    reading syms   from primary file (5 2729)
+--61881-- Scheduler: using generic scheduler lock implementation.
+--61881-- Reading suppressions file: /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp
+==61881== embedded gdbserver: reading from /var/folders/_r/ly2pm46125s9hbkjhsrzrr_c0000gn/T//vgdb-pipe-from-vgdb-to-61881-by-jiwonwoo-on-???
+==61881== embedded gdbserver: writing to   /var/folders/_r/ly2pm46125s9hbkjhsrzrr_c0000gn/T//vgdb-pipe-to-vgdb-from-61881-by-jiwonwoo-on-???
+==61881== embedded gdbserver: shared mem   /var/folders/_r/ly2pm46125s9hbkjhsrzrr_c0000gn/T//vgdb-pipe-shared-mem-vgdb-61881-by-jiwonwoo-on-???
+==61881== 
+==61881== TO CONTROL THIS PROCESS USING vgdb (which you probably
+==61881== don't want to do, unless you know exactly what you're doing,
+==61881== or are doing some strange experiment):
+==61881==   /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/../../bin/vgdb --pid=61881 ...command...
+==61881== 
+==61881== TO DEBUG THIS PROCESS USING GDB: start GDB like this
+==61881==   /path/to/gdb ./minishell
+==61881== and then give GDB the following command
+==61881==   target remote | /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/../../bin/vgdb --pid=61881
+==61881== --pid is optional if only one valgrind process is running
+==61881== 
+--61881-- REDIR: 0x1000661c0 (dyld:strcmp) redirected to 0x258058951 (???)
+--61881-- REDIR: 0x100060494 (dyld:arc4random) redirected to 0x2580589ef (???)
+--61881-- REDIR: 0x1000655a0 (dyld:strlen) redirected to 0x258058920 (???)
+--61881-- REDIR: 0x1000664c0 (dyld:strcpy) redirected to 0x25805896d (???)
+--61881-- REDIR: 0x10006363a (dyld:strcat) redirected to 0x258058931 (???)
+--61881-- REDIR: 0x10006539a (dyld:strlcat) redirected to 0x25805898a (???)
+--61881-- /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_core-amd64-darwin.so (rx at 0x100119000, rw at 0x10011d000)
+--61881--    reading syms   from primary file (3 53)
+--61881--    dSYM= /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_core-amd64-darwin.so.dSYM/Contents/Resources/DWARF/vgpreload_core-amd64-darwin.so
+--61881-- /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so (rx at 0x100125000, rw at 0x10012d000)
+--61881--    reading syms   from primary file (75 62)
+--61881--    dSYM= /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so.dSYM/Contents/Resources/DWARF/vgpreload_memcheck-amd64-darwin.so
+--61881-- /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib (rx at 0x100135000, rw at 0x10015d000)
+--61881--    reading syms   from primary file (717 337)
+--61881-- /usr/lib/libSystem.B.dylib (rx at 0x100179000, rw at 0x10017b000)
+--61881--    reading syms   from primary file (29 8)
+--61881-- /usr/lib/libncurses.5.4.dylib (rx at 0x100183000, rw at 0x1001b3000)
+--61881--    reading syms   from primary file (613 1)
+--61881-- /usr/lib/system/libcache.dylib (rx at 0x1001c7000, rw at 0x1001cd000)
+--61881--    reading syms   from primary file (32 29)
+--61881-- /usr/lib/system/libcommonCrypto.dylib (rx at 0x1001d4000, rw at 0x1001e0000)
+--61881--    reading syms   from primary file (241 173)
+--61881-- /usr/lib/system/libcompiler_rt.dylib (rx at 0x1001f0000, rw at 0x1001f8000)
+--61881--    reading syms   from primary file (505 8)
+--61881-- /usr/lib/system/libcopyfile.dylib (rx at 0x100208000, rw at 0x100212000)
+--61881--    reading syms   from primary file (11 38)
+--61881-- /usr/lib/system/libcorecrypto.dylib (rx at 0x10021a000, rw at 0x1002ad000)
+--61881--    reading syms   from primary file (586 846)
+--61881-- /usr/lib/system/libdispatch.dylib (rx at 0x1002cd000, rw at 0x10030e000)
+--61881--    reading syms   from primary file (328 1607)
+--61881-- /usr/lib/system/libdyld.dylib (rx at 0x10034b000, rw at 0x100382000)
+--61881--    reading syms   from primary file (119 1467)
+--61881-- /usr/lib/system/libkeymgr.dylib (rx at 0x1003ab000, rw at 0x1003ac000)
+--61881--    reading syms   from primary file (11 2)
+--61881-- /usr/lib/system/libmacho.dylib (rx at 0x1003bb000, rw at 0x1003c1000)
+--61881--    reading syms   from primary file (105 2)
+--61881-- /usr/lib/system/libquarantine.dylib (rx at 0x1003c9000, rw at 0x1003cc000)
+--61881--    reading syms   from primary file (88 12)
+--61881-- /usr/lib/system/libremovefile.dylib (rx at 0x1003d4000, rw at 0x1003d6000)
+--61881--    reading syms   from primary file (12 8)
+--61881-- /usr/lib/system/libsystem_asl.dylib (rx at 0x1003dd000, rw at 0x1003f5000)
+--61881--    reading syms   from primary file (219 234)
+--61881-- /usr/lib/system/libsystem_blocks.dylib (rx at 0x100405000, rw at 0x100406000)
+--61881--    reading syms   from primary file (21 8)
+--61881-- /usr/lib/system/libsystem_c.dylib (rx at 0x10040d000, rw at 0x100495000)
+--61881--    reading syms   from primary file (1346 892)
+--61881-- /usr/lib/system/libsystem_configuration.dylib (rx at 0x1004c5000, rw at 0x1004c9000)
+--61881--    reading syms   from primary file (36 68)
+--61881-- /usr/lib/system/libsystem_coreservices.dylib (rx at 0x1004d2000, rw at 0x1004d6000)
+--61881--    reading syms   from primary file (14 47)
+--61881-- /usr/lib/system/libsystem_darwin.dylib (rx at 0x1004de000, rw at 0x1004e7000)
+--61881--    reading syms   from primary file (63 562)
+--61881-- /usr/lib/system/libsystem_dnssd.dylib (rx at 0x1004f6000, rw at 0x1004fe000)
+--61881--    reading syms   from primary file (40 26)
+--61881-- /usr/lib/system/libsystem_featureflags.dylib (rx at 0x100506000, rw at 0x100508000)
+--61881--    reading syms   from primary file (1 12)
+--61881-- /usr/lib/system/libsystem_info.dylib (rx at 0x10050f000, rw at 0x10055d000)
+--61881--    reading syms   from primary file (427 714)
+--61881-- /usr/lib/system/libsystem_m.dylib (rx at 0x100575000, rw at 0x1005bd000)
+--61881--    reading syms   from primary file (811 1)
+--61881-- /usr/lib/system/libsystem_malloc.dylib (rx at 0x1005ce000, rw at 0x1005f6000)
+--61881--    reading syms   from primary file (98 470)
+--61881-- /usr/lib/system/libsystem_networkextension.dylib (rx at 0x100606000, rw at 0x100614000)
+--61881--    reading syms   from primary file (118 242)
+--61881-- /usr/lib/system/libsystem_notify.dylib (rx at 0x100624000, rw at 0x10062e000)
+--61881--    reading syms   from primary file (23 1)
+--61881-- /usr/lib/system/libsystem_sandbox.dylib (rx at 0x100636000, rw at 0x10063b000)
+--61881--    reading syms   from primary file (112 23)
+--61881-- /usr/lib/system/libsystem_secinit.dylib (rx at 0x100644000, rw at 0x100647000)
+--61881--    reading syms   from primary file (5 20)
+--61881-- /usr/lib/system/libsystem_kernel.dylib (rx at 0x10064e000, rw at 0x10067b000)
+--61881--    reading syms   from primary file (1361 230)
+--61881-- /usr/lib/system/libsystem_platform.dylib (rx at 0x10069a000, rw at 0x1006a3000)
+--61881--    reading syms   from primary file (168 103)
+--61881-- /usr/lib/system/libsystem_pthread.dylib (rx at 0x1006ad000, rw at 0x1006b8000)
+--61881--    reading syms   from primary file (189 143)
+--61881-- /usr/lib/system/libsystem_symptoms.dylib (rx at 0x1006c5000, rw at 0x1006cd000)
+--61881--    reading syms   from primary file (10 86)
+--61881-- /usr/lib/system/libsystem_trace.dylib (rx at 0x1006d5000, rw at 0x1006ec000)
+--61881--    reading syms   from primary file (131 274)
+--61881-- /usr/lib/system/libunwind.dylib (rx at 0x1006fd000, rw at 0x100703000)
+--61881--    reading syms   from primary file (102 52)
+--61881-- /usr/lib/system/libxpc.dylib (rx at 0x10070c000, rw at 0x100742000)
+--61881--    reading syms   from primary file (627 1467)
+--61881-- /usr/lib/libobjc.A.dylib (rx at 0x100770000, rw at 0x1007a4000)
+--61881--    reading syms   from primary file (382 771)
+--61881-- /usr/lib/libc++abi.dylib (rx at 0x1007c8000, rw at 0x1007de000)
+--61881--    reading syms   from primary file (366 704)
+--61881-- /usr/lib/libc++.1.dylib (rx at 0x1007fc000, rw at 0x10084f000)
+--61881--    reading syms   from primary file (2088 1160)
+--61881-- REDIR: 0x10069b3a0 (libsystem_platform.dylib:_platform_memcmp) redirected to 0x1001298b5 (_platform_memcmp)
+--61881-- REDIR: 0x10069ac00 (libsystem_platform.dylib:_platform_strncmp) redirected to 0x100129249 (_platform_strncmp)
+--61881-- REDIR: 0x10069a800 (libsystem_platform.dylib:_platform_strcmp) redirected to 0x1001292c3 (_platform_strcmp)
+--61881-- REDIR: 0x1005cece0 (libsystem_malloc.dylib:malloc) redirected to 0x1001274d0 (malloc)
+--61881-- REDIR: 0x1005d0ec1 (libsystem_malloc.dylib:calloc) redirected to 0x100127ae6 (calloc)
+--61881-- REDIR: 0x1005d0d67 (libsystem_malloc.dylib:realloc) redirected to 0x100127e64 (realloc)
+--61881-- REDIR: 0x1005d1087 (libsystem_malloc.dylib:malloc_default_zone) redirected to 0x100128819 (malloc_default_zone)
+--61881-- REDIR: 0x1005ced12 (libsystem_malloc.dylib:malloc_zone_malloc) redirected to 0x100127738 (malloc_zone_malloc)
+--61881-- REDIR: 0x1005d0ef6 (libsystem_malloc.dylib:malloc_zone_calloc) redirected to 0x100127cd2 (malloc_zone_calloc)
+--61881-- REDIR: 0x1005d108f (libsystem_malloc.dylib:malloc_zone_from_ptr) redirected to 0x10012885a (malloc_zone_from_ptr)
+--61881-- REDIR: 0x1005cf9b1 (libsystem_malloc.dylib:free) redirected to 0x1001278ac (free)
+--61881-- REDIR: 0x10069b300 (libsystem_platform.dylib:_platform_strchr$VARIANT$Haswell) redirected to 0x100128acd (_platform_strchr$VARIANT$Haswell)
+--61881-- REDIR: 0x1004640bc (libsystem_c.dylib:strrchr) redirected to 0x100128a6b (strrchr)
+--61881-- REDIR: 0x10069b1a0 (libsystem_platform.dylib:_platform_memchr$VARIANT$Haswell) redirected to 0x100129334 (_platform_memchr$VARIANT$Haswell)
+--61906-- REDIR: 0x10048a32e (libsystem_c.dylib:__strncpy_chk) redirected to 0x100129020 (__strncpy_chk)
+==61906== 
+==61906== HEAP SUMMARY:
+==61906==     in use at exit: 303,148 bytes in 427 blocks
+==61906==   total heap usage: 633 allocs, 206 frees, 323,427 bytes allocated
+==61906== 
+==61906== Searching for pointers to 427 not-freed blocks
+==61906== Checked 9,190,672 bytes
+==61906== 
+==61906== 8 bytes in 1 blocks are definitely lost in loss record 10 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100149A90: expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100149FAF: rl_expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1001387E9: rl_set_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10013880C: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 16 bytes in 1 blocks are definitely lost in loss record 23 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x100138A66: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 36 bytes in 1 blocks are definitely lost in loss record 44 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1001387B3: rl_set_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10013880C: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 36 bytes in 1 blocks are definitely lost in loss record 45 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100149A3B: expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100149FAF: rl_expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1001387E9: rl_set_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10013880C: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 256 bytes in 1 blocks are definitely lost in loss record 70 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10013890B: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 1,024 bytes in 1 blocks are definitely lost in loss record 80 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014D7D9: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 1,024 bytes in 1 blocks are definitely lost in loss record 81 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014D7EF: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 1,024 bytes in 1 blocks are definitely lost in loss record 82 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014D80C: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 1,024 bytes in 1 blocks are definitely lost in loss record 83 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014D822: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 1,024 bytes in 1 blocks are definitely lost in loss record 84 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014A05B: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 1,024 bytes in 1 blocks are definitely lost in loss record 85 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014A07D: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 1,024 bytes in 1 blocks are definitely lost in loss record 86 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014A095: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 1,024 bytes in 1 blocks are definitely lost in loss record 87 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014A0B4: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 2,032 bytes in 1 blocks are possibly lost in loss record 93 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10015147C: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 2,048 bytes in 1 blocks are definitely lost in loss record 94 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10078DE95: class_setWeakIvarLayout (in /usr/lib/libobjc.A.dylib)
+==61906==    by 0x10078DE26: class_setWeakIvarLayout (in /usr/lib/libobjc.A.dylib)
+==61906==    by 0x100791BF9: _objc_atfork_parent (in /usr/lib/libobjc.A.dylib)
+==61906==    by 0x10077F742: property_copyAttributeList (in /usr/lib/libobjc.A.dylib)
+==61906==    by 0x1007751E7: NXMapRemove (in /usr/lib/libobjc.A.dylib)
+==61906==    by 0x100787BD2: attachCategories(objc_class*, locstamped_category_t const*, unsigned int, int) (in /usr/lib/libobjc.A.dylib)
+==61906==    by 0x1007876C6: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61906==    by 0x10078769F: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61906==    by 0x10078769F: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61906==    by 0x10078769F: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61906==    by 0x100773406: objc_opt::objc_stringhash_t::getIndex(char const*) const (in /usr/lib/libobjc.A.dylib)
+==61906== 
+==61906== 3,776 (1,536 direct, 2,240 indirect) bytes in 1 blocks are definitely lost in loss record 99 of 126
+==61906==    at 0x100127EE6: realloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015AD26: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10013D971: rl_add_funmap_entry (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10013D9F3: rl_initialize_funmap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138953: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 4,055 (4,016 direct, 39 indirect) bytes in 1 blocks are definitely lost in loss record 100 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100155048: add_history (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100005CF8: handle_line (in ./minishell)
+==61906==    by 0x100001616: minishell (minishell.c:46)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 4,112 bytes in 1 blocks are definitely lost in loss record 112 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1001518BE: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1001517A5: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 45,232 (4,112 direct, 41,120 indirect) bytes in 1 blocks are definitely lost in loss record 123 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100151930: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1001517A5: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 45,232 (4,112 direct, 41,120 indirect) bytes in 1 blocks are definitely lost in loss record 124 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1001518BE: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1001517B1: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== 53,456 (4,112 direct, 49,344 indirect) bytes in 1 blocks are definitely lost in loss record 125 of 126
+==61906==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61906==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1001518BE: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1001517BD: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61906==    by 0x1000015EC: minishell (minishell.c:43)
+==61906==    by 0x1000016C8: main (minishell.c:60)
+==61906== 
+==61906== LEAK SUMMARY:
+==61906==    definitely lost: 32,592 bytes in 20 blocks
+==61906==    indirectly lost: 133,863 bytes in 175 blocks
+==61906==      possibly lost: 2,032 bytes in 1 blocks
+==61906==    still reachable: 122,903 bytes in 72 blocks
+==61906==         suppressed: 11,758 bytes in 159 blocks
+==61906== Reachable blocks (those to which a pointer was found) are not shown.
+==61906== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==61906== 
+==61906== ERROR SUMMARY: 21 errors from 21 contexts (suppressed: 9 from 9)
+--61906-- 
+--61906-- used_suppression:      2 OSX1015:dyld-4 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:751 suppressed: 4,128 bytes in 2 blocks
+--61906-- used_suppression:     15 OSX1015:dyld-7 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:781 suppressed: 4,032 bytes in 120 blocks
+--61906-- used_suppression:     13 OSX1015:dyld-8 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:791 suppressed: 3,174 bytes in 29 blocks
+--61906-- used_suppression:      6 OSX1015:dyld-5 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:761 suppressed: 424 bytes in 8 blocks
+--61906-- used_suppression:      1 OSX1015:dyld-2 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:733
+==61906== 
+==61906== ERROR SUMMARY: 21 errors from 21 contexts (suppressed: 9 from 9)
+==61881== Warning: invalid file descriptor -1 in syscall close()
+==61881==    at 0x10064F806: close (in /usr/lib/system/libsystem_kernel.dylib)
+==61881==    by 0x100005C47: handle_simple (in ./minishell)
+==61881==    by 0x100005E29: handle_line (in ./minishell)
+==61881==    by 0x100001616: minishell (minishell.c:46)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== Warning: invalid file descriptor -1 in syscall close()
+==61881==    at 0x10064F806: close (in /usr/lib/system/libsystem_kernel.dylib)
+==61881==    by 0x100005C5A: handle_simple (in ./minishell)
+==61881==    by 0x100005E29: handle_line (in ./minishell)
+==61881==    by 0x100001616: minishell (minishell.c:46)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+--61917-- REDIR: 0x10048a32e (libsystem_c.dylib:__strncpy_chk) redirected to 0x100129020 (__strncpy_chk)
+==61917== 
+==61917== HEAP SUMMARY:
+==61917==     in use at exit: 303,202 bytes in 430 blocks
+==61917==   total heap usage: 666 allocs, 236 frees, 324,916 bytes allocated
+==61917== 
+==61917== Searching for pointers to 430 not-freed blocks
+==61917== Checked 9,190,672 bytes
+==61917== 
+==61917== 8 bytes in 1 blocks are definitely lost in loss record 9 of 126
+==61917==    at 0x100127EE6: realloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015AD26: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100149B29: expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100149FAF: rl_expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1001387E9: rl_set_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10013880C: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100001649: minishell (minishell.c:50)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 16 bytes in 1 blocks are definitely lost in loss record 22 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x100138A66: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 36 bytes in 1 blocks are definitely lost in loss record 43 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1001387B3: rl_set_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10013880C: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100001649: minishell (minishell.c:50)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 36 bytes in 1 blocks are definitely lost in loss record 44 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100149AD6: expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100149FAF: rl_expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1001387E9: rl_set_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10013880C: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100001649: minishell (minishell.c:50)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 256 bytes in 1 blocks are definitely lost in loss record 70 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10013890B: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 1,024 bytes in 1 blocks are definitely lost in loss record 80 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014D7D9: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 1,024 bytes in 1 blocks are definitely lost in loss record 81 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014D7EF: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 1,024 bytes in 1 blocks are definitely lost in loss record 82 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014D80C: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 1,024 bytes in 1 blocks are definitely lost in loss record 83 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014D822: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 1,024 bytes in 1 blocks are definitely lost in loss record 84 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014A05B: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 1,024 bytes in 1 blocks are definitely lost in loss record 85 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014A07D: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 1,024 bytes in 1 blocks are definitely lost in loss record 86 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014A095: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 1,024 bytes in 1 blocks are definitely lost in loss record 87 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014A0B4: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 2,032 bytes in 1 blocks are possibly lost in loss record 93 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10015147C: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 2,048 bytes in 1 blocks are definitely lost in loss record 94 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10078DE95: class_setWeakIvarLayout (in /usr/lib/libobjc.A.dylib)
+==61917==    by 0x10078DE26: class_setWeakIvarLayout (in /usr/lib/libobjc.A.dylib)
+==61917==    by 0x100791BF9: _objc_atfork_parent (in /usr/lib/libobjc.A.dylib)
+==61917==    by 0x10077F742: property_copyAttributeList (in /usr/lib/libobjc.A.dylib)
+==61917==    by 0x1007751E7: NXMapRemove (in /usr/lib/libobjc.A.dylib)
+==61917==    by 0x100787BD2: attachCategories(objc_class*, locstamped_category_t const*, unsigned int, int) (in /usr/lib/libobjc.A.dylib)
+==61917==    by 0x1007876C6: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61917==    by 0x10078769F: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61917==    by 0x10078769F: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61917==    by 0x10078769F: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61917==    by 0x100773406: objc_opt::objc_stringhash_t::getIndex(char const*) const (in /usr/lib/libobjc.A.dylib)
+==61917== 
+==61917== 3,776 (1,536 direct, 2,240 indirect) bytes in 1 blocks are definitely lost in loss record 99 of 126
+==61917==    at 0x100127EE6: realloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015AD26: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10013D971: rl_add_funmap_entry (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10013D9F3: rl_initialize_funmap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138953: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 4,097 (4,016 direct, 81 indirect) bytes in 1 blocks are definitely lost in loss record 102 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100155048: add_history (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100005CF8: handle_line (in ./minishell)
+==61917==    by 0x100001616: minishell (minishell.c:46)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 4,112 bytes in 1 blocks are definitely lost in loss record 112 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1001518BE: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1001517A5: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 45,232 (4,112 direct, 41,120 indirect) bytes in 1 blocks are definitely lost in loss record 123 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100151930: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1001517A5: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 45,232 (4,112 direct, 41,120 indirect) bytes in 1 blocks are definitely lost in loss record 124 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1001518BE: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1001517B1: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== 53,456 (4,112 direct, 49,344 indirect) bytes in 1 blocks are definitely lost in loss record 125 of 126
+==61917==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61917==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1001518BE: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1001517BD: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61917==    by 0x1000015EC: minishell (minishell.c:43)
+==61917==    by 0x1000016C8: main (minishell.c:60)
+==61917== 
+==61917== LEAK SUMMARY:
+==61917==    definitely lost: 32,592 bytes in 20 blocks
+==61917==    indirectly lost: 133,905 bytes in 178 blocks
+==61917==      possibly lost: 2,032 bytes in 1 blocks
+==61917==    still reachable: 122,915 bytes in 72 blocks
+==61917==         suppressed: 11,758 bytes in 159 blocks
+==61917== Reachable blocks (those to which a pointer was found) are not shown.
+==61917== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==61917== 
+==61917== ERROR SUMMARY: 21 errors from 21 contexts (suppressed: 9 from 9)
+--61917-- 
+--61917-- used_suppression:      2 OSX1015:dyld-4 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:751 suppressed: 4,128 bytes in 2 blocks
+--61917-- used_suppression:     15 OSX1015:dyld-7 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:781 suppressed: 4,032 bytes in 120 blocks
+--61917-- used_suppression:     13 OSX1015:dyld-8 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:791 suppressed: 3,174 bytes in 29 blocks
+--61917-- used_suppression:      6 OSX1015:dyld-5 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:761 suppressed: 424 bytes in 8 blocks
+--61917-- used_suppression:      1 OSX1015:dyld-2 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:733
+==61917== 
+==61917== ERROR SUMMARY: 21 errors from 21 contexts (suppressed: 9 from 9)
+==61881== Warning: invalid file descriptor -1 in syscall close()
+==61881==    at 0x10064F806: close (in /usr/lib/system/libsystem_kernel.dylib)
+==61881==    by 0x100005C47: handle_simple (in ./minishell)
+==61881==    by 0x100005E29: handle_line (in ./minishell)
+==61881==    by 0x100001616: minishell (minishell.c:46)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== Warning: invalid file descriptor -1 in syscall close()
+==61881==    at 0x10064F806: close (in /usr/lib/system/libsystem_kernel.dylib)
+==61881==    by 0x100005C5A: handle_simple (in ./minishell)
+==61881==    by 0x100005E29: handle_line (in ./minishell)
+==61881==    by 0x100001616: minishell (minishell.c:46)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== HEAP SUMMARY:
+==61881==     in use at exit: 300,672 bytes in 409 blocks
+==61881==   total heap usage: 634 allocs, 225 frees, 323,089 bytes allocated
+==61881== 
+==61881== Searching for pointers to 409 not-freed blocks
+==61881== Checked 9,187,960 bytes
+==61881== 
+==61881== 8 bytes in 1 blocks are definitely lost in loss record 2 of 103
+==61881==    at 0x100127EE6: realloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015AD26: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100149B29: expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100149FAF: rl_expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1001387E9: rl_set_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10013880C: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100001649: minishell (minishell.c:50)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 16 bytes in 1 blocks are definitely lost in loss record 12 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x100138A66: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 36 bytes in 1 blocks are definitely lost in loss record 26 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1001387B3: rl_set_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10013880C: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100001649: minishell (minishell.c:50)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 36 bytes in 1 blocks are definitely lost in loss record 27 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100149AD6: expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100149FAF: rl_expand_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1001387E9: rl_set_prompt (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10013880C: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100001649: minishell (minishell.c:50)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 256 bytes in 1 blocks are definitely lost in loss record 49 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10013890B: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 1,024 bytes in 1 blocks are definitely lost in loss record 57 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014D7D9: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 1,024 bytes in 1 blocks are definitely lost in loss record 58 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014D7EF: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 1,024 bytes in 1 blocks are definitely lost in loss record 59 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014D80C: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 1,024 bytes in 1 blocks are definitely lost in loss record 60 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015AD30: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014D822: realloc_line (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014A028: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 1,024 bytes in 1 blocks are definitely lost in loss record 61 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014A05B: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 1,024 bytes in 1 blocks are definitely lost in loss record 62 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014A07D: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 1,024 bytes in 1 blocks are definitely lost in loss record 63 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014A095: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 1,024 bytes in 1 blocks are definitely lost in loss record 64 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014A0B4: init_line_structures (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100147D6E: rl_redisplay (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138C08: readline_internal_setup (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138832: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 2,032 bytes in 1 blocks are possibly lost in loss record 70 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10015147C: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 2,048 bytes in 1 blocks are definitely lost in loss record 71 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10078DE95: class_setWeakIvarLayout (in /usr/lib/libobjc.A.dylib)
+==61881==    by 0x10078DE26: class_setWeakIvarLayout (in /usr/lib/libobjc.A.dylib)
+==61881==    by 0x100791BF9: _objc_atfork_parent (in /usr/lib/libobjc.A.dylib)
+==61881==    by 0x10077F742: property_copyAttributeList (in /usr/lib/libobjc.A.dylib)
+==61881==    by 0x1007751E7: NXMapRemove (in /usr/lib/libobjc.A.dylib)
+==61881==    by 0x100787BD2: attachCategories(objc_class*, locstamped_category_t const*, unsigned int, int) (in /usr/lib/libobjc.A.dylib)
+==61881==    by 0x1007876C6: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61881==    by 0x10078769F: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61881==    by 0x10078769F: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61881==    by 0x10078769F: objc_class::mangledName() (in /usr/lib/libobjc.A.dylib)
+==61881==    by 0x100773406: objc_opt::objc_stringhash_t::getIndex(char const*) const (in /usr/lib/libobjc.A.dylib)
+==61881== 
+==61881== 3,776 (1,536 direct, 2,240 indirect) bytes in 1 blocks are definitely lost in loss record 76 of 103
+==61881==    at 0x100127EE6: realloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015AD26: xrealloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10013D971: rl_add_funmap_entry (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10013D9F3: rl_initialize_funmap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138953: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 4,097 (4,016 direct, 81 indirect) bytes in 1 blocks are definitely lost in loss record 79 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100155048: add_history (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100005CF8: handle_line (in ./minishell)
+==61881==    by 0x100001616: minishell (minishell.c:46)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 4,112 bytes in 1 blocks are definitely lost in loss record 89 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1001518BE: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1001517A5: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 45,232 (4,112 direct, 41,120 indirect) bytes in 1 blocks are definitely lost in loss record 100 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100151930: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1001517A5: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 45,232 (4,112 direct, 41,120 indirect) bytes in 1 blocks are definitely lost in loss record 101 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1001518BE: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1001517B1: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== 53,456 (4,112 direct, 49,344 indirect) bytes in 1 blocks are definitely lost in loss record 102 of 103
+==61881==    at 0x100127545: malloc (in /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/vgpreload_memcheck-amd64-darwin.so)
+==61881==    by 0x10015ACDC: xmalloc (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10013DAC2: rl_make_bare_keymap (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100143581: rl_generic_bind (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x10014331E: rl_bind_keyseq_if_unbound_in_map (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1001518BE: bind_termcap_arrow_keys (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1001517BD: _rl_init_terminal_io (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138939: rl_initialize (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x100138811: readline (in /usr/local/Cellar/readline/8.1/lib/libreadline.8.1.dylib)
+==61881==    by 0x1000015EC: minishell (minishell.c:43)
+==61881==    by 0x1000016C8: main (minishell.c:60)
+==61881== 
+==61881== LEAK SUMMARY:
+==61881==    definitely lost: 32,592 bytes in 20 blocks
+==61881==    indirectly lost: 133,905 bytes in 178 blocks
+==61881==      possibly lost: 2,032 bytes in 1 blocks
+==61881==    still reachable: 120,321 bytes in 50 blocks
+==61881==         suppressed: 11,822 bytes in 160 blocks
+==61881== Reachable blocks (those to which a pointer was found) are not shown.
+==61881== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==61881== 
+==61881== ERROR SUMMARY: 21 errors from 21 contexts (suppressed: 4 from 4)
+--61881-- 
+--61881-- used_suppression:      2 OSX1015:dyld-4 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:751 suppressed: 4,128 bytes in 2 blocks
+--61881-- used_suppression:     17 OSX1015:dyld-7 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:781 suppressed: 2,560 bytes in 74 blocks
+--61881-- used_suppression:     15 OSX1015:dyld-8 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:791 suppressed: 4,870 bytes in 81 blocks
+--61881-- used_suppression:      1 OSX1015:dyld-5 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:761 suppressed: 264 bytes in 3 blocks
+--61881-- used_suppression:      1 OSX1015:dyld-2 /usr/local/Cellar/valgrind/HEAD-eec4cf7/libexec/valgrind/default.supp:733
+==61881== 
+==61881== ERROR SUMMARY: 21 errors from 21 contexts (suppressed: 4 from 4)

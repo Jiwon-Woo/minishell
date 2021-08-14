@@ -6,11 +6,19 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/12 16:41:28 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 16:41:29 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/14 12:12:25 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+void	close_fd(int *fd)
+{
+	if (fd[0] > 0)
+		close(fd[0]);
+	if (fd[1] > 0)
+		close(fd[1]);
+}
 
 void	free_fd(t_fd *fd)
 {
@@ -20,6 +28,7 @@ void	free_fd(t_fd *fd)
 		return ;
 	if (fd->fd)
 	{
+		close_fd(fd->fd);
 		free(fd->fd);
 		fd->fd = 0;
 	}
@@ -29,7 +38,10 @@ void	free_fd(t_fd *fd)
 		while (++i < fd->size)
 		{
 			if (fd->pipe_fds[i] != 0)
+			{
+				close_fd(fd->pipe_fds[i]);
 				free(fd->pipe_fds[i]);
+			}
 			fd->pipe_fds[i] = 0;
 		}
 		free(fd->pipe_fds);

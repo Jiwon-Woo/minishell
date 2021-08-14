@@ -1,31 +1,36 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstclear.c                                      :+:      :+:    :+:   */
+/*   mini_echo.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/08/10 09:59:27 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/14 11:32:47 by jwoo             ###   ########.fr       */
+/*   Created: 2021/08/14 11:08:28 by jwoo              #+#    #+#             */
+/*   Updated: 2021/08/14 11:08:29 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "minishell.h"
 
-void	ft_lstclear(t_list **lst, void (*del)(void *))
+int	mini_echo(char **arg_arr)
 {
-	t_list	*temp;
+	int		idx;
+	bool	n_option;
 
-	if (lst == NULL || del == NULL)
-		return ;
-	while (*lst != NULL)
+	idx = 0;
+	n_option = false;
+	if (ft_strncmp(arg_arr[1], "-n", 3) == 0)
 	{
-		temp = *lst;
-		del((*lst)->content);
-		(*lst)->content = 0;
-		*lst = (*lst)->next;
-		free(temp);
-		temp = 0;
+		n_option = true;
+		idx++;
 	}
-	return ;
+	while (arg_arr[++idx])
+	{
+		write(1, arg_arr[idx], ft_strlen(arg_arr[idx]));
+		if (arg_arr[idx + 1])
+			write(1, " ", 1);
+	}
+	if (!n_option)
+		write(1, "\n", 1);
+	return (0);
 }

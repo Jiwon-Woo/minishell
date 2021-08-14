@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/11 09:33:57 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 12:32:02 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/14 10:51:58 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 int	is_not_bulitin(char **arg_arr, t_envp *envp, bool is_parent)
 {
+	if (ft_strncmp(arg_arr[0], "echo", 5) == 0)
+		return (mini_echo(arg_arr));
 	if (ft_strncmp(arg_arr[0], "cd", 3) == 0)
 		return (mini_cd(arg_arr, envp));
 	if (ft_strncmp(arg_arr[0], "export", 7) == 0)

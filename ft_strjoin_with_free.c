@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 14:41:07 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/10 14:41:08 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/14 11:25:53 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,12 @@ char	*strjoin_exception_case(char *s1, char *s2)
 	return (0);
 }
 
-void	free_strjoin_arg(char *s1, char *s2)
+void	free_strjoin_arg(char **s1, char **s2)
 {
-	free(s1);
-	s1 = 0;
-	free(s2);
-	s2 = 0;
+	free(*s1);
+	*s1 = 0;
+	free(*s2);
+	*s2 = 0;
 }
 
 char	*ft_strjoin_with_free(char *s1, char *s2)
@@ -54,6 +54,6 @@ char	*ft_strjoin_with_free(char *s1, char *s2)
 	while (i < len2)
 		str[index++] = s2[i++];
 	str[index] = '\0';
-	free_strjoin_arg(s1, s2);
+	free_strjoin_arg(&s1, &s2);
 	return (str);
 }

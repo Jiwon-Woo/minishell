@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/12 17:07:18 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/12 18:36:22 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/14 11:23:21 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	input_redirect(t_cmd *cmd, t_fd *fd, char **redirect_cmd, char **error_file)
 			write(2, seperate, ft_strlen(seperate));
 		write(2, "'\n", 2);
 		g_status = 258;
-		return (free_ret(seperate, 1));
+		return (free_ret(&seperate, 1));
 	}
 	if (fd->fd[0] > 0)
 		close(fd->fd[0]);

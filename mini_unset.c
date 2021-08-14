@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/10 16:21:14 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/10 16:21:50 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/14 11:59:23 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,18 +32,23 @@ void	unset_var(t_envp *envp, int flag)
 	char	**temp;
 	int		i;
 	int		idx;
+	int		size;
 
 	i = -1;
 	idx = 0;
-	temp = (char **)malloc(sizeof(char *) * get_arg_size(envp->envp_list));
+	size = get_arg_size(envp->envp_list);
+	temp = (char **)malloc(sizeof(char *) * size);
 	if (temp == 0)
 		exit(1);
-	while (++i < get_arg_size(envp->envp_list))
+	while (++i < size)
 	{
 		if (i != flag)
 			temp[idx++] = envp->envp_list[i];
 		else
+		{
 			free(envp->envp_list[i]);
+			envp->envp_list[i] = 0;
+		}
 	}
 	temp[idx] = 0;
 	if (envp->envp_list != 0)
