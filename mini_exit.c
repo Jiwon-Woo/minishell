@@ -6,7 +6,7 @@
 /*   By: jwoo <jwoo@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/11 09:42:44 by jwoo              #+#    #+#             */
-/*   Updated: 2021/08/11 10:02:28 by jwoo             ###   ########.fr       */
+/*   Updated: 2021/08/16 12:19:55 by jwoo             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,6 @@ int	mini_exit(char **arg_arr, bool is_parent)
 	if (error == -1)
 		ret = print_exit_err(arg_arr[1], 0);
 	else if (get_arg_size(arg_arr) > 2)
-		ret = print_exit_err(0, 1);
+		return (print_exit_err(0, 1));
 	exit (((int)(char)(ret)));
 }
